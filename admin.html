@@ -19,54 +19,98 @@
     }
 
     .wrap {
-      max-width: 1100px;
+      max-width: 1250px;
       margin: auto;
-      padding: 30px 18px;
+      padding: 28px 18px;
     }
 
-    .logo {
+    .brand {
       font-size: 28px;
       font-weight: 900;
       letter-spacing: 1px;
+      margin-bottom: 22px;
     }
 
-    .logo span { color: #e50914; }
+    .brand span { color: #e50914; }
 
     .card {
       background: #111722;
       border: 1px solid #252d3a;
       border-radius: 14px;
-      padding: 24px;
-      margin-top: 24px;
+      padding: 22px;
+      margin-bottom: 20px;
     }
 
-    input, button {
+    h1, h2, h3, p { margin-top: 0; }
+
+    .muted {
+      color: #9ca6b5;
+    }
+
+    input, select, textarea, button {
+      font: inherit;
+    }
+
+    input, select, textarea {
       width: 100%;
-      padding: 13px;
-      border-radius: 8px;
-      font-size: 15px;
-    }
-
-    input {
       background: #080b12;
       color: #fff;
       border: 1px solid #303847;
-      margin: 8px 0 14px;
+      border-radius: 8px;
+      padding: 11px 12px;
+    }
+
+    textarea {
+      min-height: 90px;
+      resize: vertical;
     }
 
     button {
       border: 0;
-      background: #e50914;
-      color: white;
-      font-weight: 800;
+      border-radius: 8px;
+      padding: 11px 16px;
       cursor: pointer;
+      font-weight: 800;
     }
 
-    button:hover { opacity: .9; }
+    .primary {
+      background: #e50914;
+      color: #fff;
+    }
 
-    .muted { color: #9ca6b5; }
+    .secondary {
+      background: #252d3a;
+      color: #fff;
+    }
 
-    #adminPanel { display: none; }
+    .danger {
+      background: #3a2024;
+      color: #ff8d95;
+    }
+
+    button:hover {
+      opacity: .9;
+    }
+
+    #adminPanel {
+      display: none;
+    }
+
+    .login-box {
+      max-width: 650px;
+      margin: 60px auto;
+    }
+
+    label {
+      display: block;
+      margin: 12px 0 7px;
+      font-weight: 700;
+    }
+
+    .message {
+      margin-top: 12px;
+      color: #ff6670;
+    }
 
     .topbar {
       display: flex;
@@ -76,124 +120,815 @@
       flex-wrap: wrap;
     }
 
-    .logout {
-      width: auto;
-      padding: 10px 18px;
-      background: #252d3a;
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
     }
 
-    .message {
-      margin-top: 14px;
-      color: #ff6670;
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+    }
+
+    .stat {
+      background: #0c111a;
+      border: 1px solid #252d3a;
+      border-radius: 12px;
+      padding: 18px;
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: 900;
+      margin-top: 7px;
+    }
+
+    .filters {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 850px;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 13px 10px;
+      border-bottom: 1px solid #252d3a;
+      vertical-align: middle;
+    }
+
+    th {
+      color: #aeb7c5;
+      font-size: 13px;
+      text-transform: uppercase;
+    }
+
+    .status {
+      display: inline-block;
+      padding: 5px 9px;
+      border-radius: 999px;
+      background: #252d3a;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .details {
+      display: none;
+      margin-top: 18px;
+      border-top: 1px solid #252d3a;
+      padding-top: 20px;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .detail-item {
+      background: #0c111a;
+      border: 1px solid #252d3a;
+      border-radius: 9px;
+      padding: 13px;
+    }
+
+    .detail-label {
+      color: #8e98a8;
+      font-size: 12px;
+      margin-bottom: 5px;
+    }
+
+    .detail-value {
+      word-break: break-word;
+    }
+
+    .empty {
+      padding: 30px;
+      text-align: center;
+      color: #9ca6b5;
+    }
+
+    .toast {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      background: #151d29;
+      border: 1px solid #303847;
+      padding: 14px 18px;
+      border-radius: 10px;
+      display: none;
+      z-index: 10;
+    }
+
+    @media (max-width: 850px) {
+      .stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .filters,
+      .detail-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 500px) {
+      .stats {
+        grid-template-columns: 1fr;
+      }
+
+      .wrap {
+        padding: 18px 12px;
+      }
     }
   </style>
 </head>
 
 <body>
+
   <div class="wrap">
 
-    <div class="logo">
+    <div class="brand">
       HAWKS <span>VERSE</span>
     </div>
 
     <!-- LOGIN -->
-    <div id="loginCard" class="card">
-      <h2>Admin Login</h2>
+    <div id="loginCard" class="card login-box">
+      <h1>Admin Login</h1>
       <p class="muted">HAWKS VERSE Tournament Management</p>
 
-      <label>Email</label>
-      <input
-        id="email"
-        type="email"
-        value="hawksverse@gmail.com"
-        placeholder="Admin email"
-      >
+      <label for="email">Email</label>
+      <input id="email" type="email" value="hawksverse@gmail.com">
 
-      <label>Password</label>
-      <input
-        id="password"
-        type="password"
-        placeholder="Enter admin password"
-      >
+      <label for="password">Password</label>
+      <input id="password" type="password" placeholder="Enter admin password">
 
-      <button id="loginBtn">LOGIN</button>
+      <button id="loginBtn" class="primary" style="width:100%; margin-top:16px;">
+        LOGIN
+      </button>
 
       <div id="loginMessage" class="message"></div>
     </div>
+
 
     <!-- ADMIN PANEL -->
     <div id="adminPanel">
 
       <div class="card topbar">
         <div>
-          <h2>Admin Dashboard</h2>
+          <h1>Admin Dashboard</h1>
           <div class="muted">HAWKS VERSE Management Panel</div>
         </div>
 
-        <button class="logout" id="logoutBtn">LOGOUT</button>
+        <div class="actions">
+          <button id="refreshBtn" class="secondary">REFRESH</button>
+          <button id="logoutBtn" class="danger">LOGOUT</button>
+        </div>
       </div>
 
-      <div class="card">
-        <h3>Dashboard</h3>
-        <p class="muted">
-          Admin panel is connected. Registration and tournament management will appear here.
-        </p>
+
+      <!-- STATS -->
+      <div class="stats">
+
+        <div class="stat">
+          <div class="muted">Total Registrations</div>
+          <div id="totalCount" class="stat-value">0</div>
+        </div>
+
+        <div class="stat">
+          <div class="muted">Registered</div>
+          <div id="registeredCount" class="stat-value">0</div>
+        </div>
+
+        <div class="stat">
+          <div class="muted">Under Review</div>
+          <div id="reviewCount" class="stat-value">0</div>
+        </div>
+
+        <div class="stat">
+          <div class="muted">Confirmed</div>
+          <div id="confirmedCount" class="stat-value">0</div>
+        </div>
+
+        <div class="stat">
+          <div class="muted">Rejected</div>
+          <div id="rejectedCount" class="stat-value">0</div>
+        </div>
+
+      </div>
+
+
+      <!-- REGISTRATIONS -->
+      <div class="card" style="margin-top:20px;">
+
+        <div class="topbar">
+          <div>
+            <h2>Registrations</h2>
+            <div class="muted">Manage tournament registrations</div>
+          </div>
+
+          <button id="exportBtn" class="secondary">
+            EXPORT CSV
+          </button>
+        </div>
+
+        <div class="filters">
+
+          <input
+            id="searchInput"
+            type="text"
+            placeholder="Search Registration ID, Team or IGL..."
+          >
+
+          <select id="statusFilter">
+            <option value="">All Statuses</option>
+            <option value="registered">Registered</option>
+            <option value="under_review">Under Review</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="rejected">Rejected</option>
+          </select>
+
+        </div>
+
+        <div id="tableArea"></div>
+
       </div>
 
     </div>
 
   </div>
 
-  <script>
-    const client = supabase.createClient(
-      window.HAWKS_CONFIG.supabaseUrl,
-      window.HAWKS_CONFIG.supabasePublishableKey
+  <div id="toast" class="toast"></div>
+
+
+<script>
+
+const client = supabase.createClient(
+  window.HAWKS_CONFIG.supabaseUrl,
+  window.HAWKS_CONFIG.supabasePublishableKey
+);
+
+let registrations = [];
+let selectedRegistration = null;
+
+const loginCard = document.getElementById("loginCard");
+const adminPanel = document.getElementById("adminPanel");
+const loginMessage = document.getElementById("loginMessage");
+
+function showAdmin() {
+  loginCard.style.display = "none";
+  adminPanel.style.display = "block";
+  loadRegistrations();
+}
+
+function showLogin() {
+  adminPanel.style.display = "none";
+  loginCard.style.display = "block";
+}
+
+function showToast(message) {
+  const toast = document.getElementById("toast");
+  toast.textContent = message;
+  toast.style.display = "block";
+
+  setTimeout(() => {
+    toast.style.display = "none";
+  }, 2500);
+}
+
+
+async function checkSession() {
+
+  const { data, error } = await client.auth.getSession();
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  if (data.session) {
+    showAdmin();
+  }
+}
+
+
+document.getElementById("loginBtn").addEventListener("click", async () => {
+
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+
+  if (!email || !password) {
+    loginMessage.textContent = "Please enter email and password.";
+    return;
+  }
+
+  loginMessage.textContent = "Logging in...";
+
+  const { error } = await client.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if (error) {
+    loginMessage.textContent = error.message;
+    return;
+  }
+
+  loginMessage.textContent = "";
+  showAdmin();
+});
+
+
+document.getElementById("logoutBtn").addEventListener("click", async () => {
+
+  await client.auth.signOut();
+
+  registrations = [];
+  selectedRegistration = null;
+
+  showLogin();
+
+  document.getElementById("password").value = "";
+});
+
+
+async function loadRegistrations() {
+
+  const tableArea = document.getElementById("tableArea");
+
+  tableArea.innerHTML = `
+    <div class="empty">Loading registrations...</div>
+  `;
+
+  const { data, error } = await client
+    .from("registrations")
+    .select(`
+      id,
+      registration_id,
+      tournament_id,
+      team_name,
+      team_logo_url,
+      igl_name,
+      igl_uid,
+      igl_mobile,
+      player2_name,
+      player2_uid,
+      player3_name,
+      player3_uid,
+      player4_name,
+      player4_uid,
+      status,
+      admin_note,
+      created_at,
+      updated_at,
+      tournaments (
+        name,
+        season,
+        prize_pool
+      )
+    `)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+
+    console.error(error);
+
+    tableArea.innerHTML = `
+      <div class="empty">
+        Failed to load registrations.<br>
+        <span class="muted">${escapeHtml(error.message)}</span>
+      </div>
+    `;
+
+    return;
+  }
+
+  registrations = data || [];
+
+  updateStats();
+  renderTable();
+}
+
+
+function updateStats() {
+
+  const count = status =>
+    registrations.filter(r => r.status === status).length;
+
+  document.getElementById("totalCount").textContent =
+    registrations.length;
+
+  document.getElementById("registeredCount").textContent =
+    count("registered");
+
+  document.getElementById("reviewCount").textContent =
+    count("under_review");
+
+  document.getElementById("confirmedCount").textContent =
+    count("confirmed");
+
+  document.getElementById("rejectedCount").textContent =
+    count("rejected");
+}
+
+
+function filteredRegistrations() {
+
+  const search =
+    document.getElementById("searchInput").value
+      .trim()
+      .toLowerCase();
+
+  const status =
+    document.getElementById("statusFilter").value;
+
+  return registrations.filter(r => {
+
+    const matchesSearch =
+      !search ||
+      String(r.registration_id || "").toLowerCase().includes(search) ||
+      String(r.team_name || "").toLowerCase().includes(search) ||
+      String(r.igl_name || "").toLowerCase().includes(search);
+
+    const matchesStatus =
+      !status || r.status === status;
+
+    return matchesSearch && matchesStatus;
+  });
+}
+
+
+function renderTable() {
+
+  const rows = filteredRegistrations();
+  const tableArea = document.getElementById("tableArea");
+
+  if (!rows.length) {
+
+    tableArea.innerHTML = `
+      <div class="empty">
+        No registrations found.
+      </div>
+    `;
+
+    return;
+  }
+
+  let html = `
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Registration ID</th>
+            <th>Team</th>
+            <th>IGL</th>
+            <th>Tournament</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+  `;
+
+  rows.forEach(r => {
+
+    const tournament =
+      r.tournaments?.name || "—";
+
+    const date =
+      r.created_at
+        ? new Date(r.created_at).toLocaleString()
+        : "—";
+
+    html += `
+      <tr>
+        <td><strong>${escapeHtml(r.registration_id)}</strong></td>
+        <td>${escapeHtml(r.team_name)}</td>
+        <td>${escapeHtml(r.igl_name)}</td>
+        <td>${escapeHtml(tournament)}</td>
+        <td>
+          <span class="status">
+            ${formatStatus(r.status)}
+          </span>
+        </td>
+        <td>${escapeHtml(date)}</td>
+        <td>
+          <button
+            class="secondary"
+            onclick="viewRegistration('${r.id}')"
+          >
+            VIEW
+          </button>
+        </td>
+      </tr>
+    `;
+  });
+
+  html += `
+        </tbody>
+      </table>
+    </div>
+
+    <div id="detailsBox" class="details"></div>
+  `;
+
+  tableArea.innerHTML = html;
+}
+
+
+window.viewRegistration = function(id) {
+
+  const r = registrations.find(x => x.id === id);
+
+  if (!r) return;
+
+  selectedRegistration = r;
+
+  const box = document.getElementById("detailsBox");
+
+  const tournament =
+    r.tournaments?.name || "—";
+
+  box.innerHTML = `
+
+    <h3>
+      Registration Details —
+      ${escapeHtml(r.registration_id)}
+    </h3>
+
+    <div class="detail-grid">
+
+      ${detail("Tournament", tournament)}
+      ${detail("Team / Squad", r.team_name)}
+      ${detail("IGL Name", r.igl_name)}
+      ${detail("IGL UID", r.igl_uid)}
+      ${detail("IGL Mobile", r.igl_mobile)}
+
+      ${detail("Player 2", r.player2_name)}
+      ${detail("Player 2 UID", r.player2_uid)}
+
+      ${detail("Player 3", r.player3_name)}
+      ${detail("Player 3 UID", r.player3_uid)}
+
+      ${detail("Player 4", r.player4_name)}
+      ${detail("Player 4 UID", r.player4_uid)}
+
+      ${detail("Created", new Date(r.created_at).toLocaleString())}
+
+    </div>
+
+    <label>Status</label>
+
+    <select id="editStatus">
+      <option value="registered" ${r.status === "registered" ? "selected" : ""}>
+        Registered
+      </option>
+
+      <option value="under_review" ${r.status === "under_review" ? "selected" : ""}>
+        Under Review
+      </option>
+
+      <option value="confirmed" ${r.status === "confirmed" ? "selected" : ""}>
+        Confirmed
+      </option>
+
+      <option value="rejected" ${r.status === "rejected" ? "selected" : ""}>
+        Rejected
+      </option>
+    </select>
+
+    <label>Admin Note</label>
+
+    <textarea id="adminNote"
+      placeholder="Optional reason or note..."
+    >${escapeHtml(r.admin_note || "")}</textarea>
+
+    <div class="actions" style="margin-top:14px;">
+
+      <button
+        class="primary"
+        onclick="saveRegistration()"
+      >
+        SAVE CHANGES
+      </button>
+
+      <button
+        class="secondary"
+        onclick="closeDetails()"
+      >
+        CLOSE
+      </button>
+
+    </div>
+  `;
+
+  box.style.display = "block";
+
+  box.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+};
+
+
+window.saveRegistration = async function() {
+
+  if (!selectedRegistration) return;
+
+  const status =
+    document.getElementById("editStatus").value;
+
+  const admin_note =
+    document.getElementById("adminNote").value.trim();
+
+  const { error } = await client
+    .from("registrations")
+    .update({
+      status,
+      admin_note,
+      updated_at: new Date().toISOString()
+    })
+    .eq("id", selectedRegistration.id);
+
+  if (error) {
+
+    alert("Update failed: " + error.message);
+
+    return;
+  }
+
+  showToast("Registration updated successfully.");
+
+  await loadRegistrations();
+
+  selectedRegistration = null;
+};
+
+
+window.closeDetails = function() {
+
+  const box = document.getElementById("detailsBox");
+
+  if (box) {
+    box.style.display = "none";
+  }
+
+  selectedRegistration = null;
+};
+
+
+function detail(label, value) {
+
+  return `
+    <div class="detail-item">
+      <div class="detail-label">${escapeHtml(label)}</div>
+      <div class="detail-value">${escapeHtml(value ?? "—")}</div>
+    </div>
+  `;
+}
+
+
+function formatStatus(status) {
+
+  if (status === "under_review") return "Under Review";
+
+  if (status === "registered") return "Registered";
+
+  if (status === "confirmed") return "Confirmed";
+
+  if (status === "rejected") return "Rejected";
+
+  return status || "—";
+}
+
+
+function escapeHtml(value) {
+
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+
+document.getElementById("searchInput")
+  .addEventListener("input", renderTable);
+
+document.getElementById("statusFilter")
+  .addEventListener("change", renderTable);
+
+document.getElementById("refreshBtn")
+  .addEventListener("click", loadRegistrations);
+
+
+document.getElementById("exportBtn")
+  .addEventListener("click", () => {
+
+    if (!registrations.length) {
+      alert("No registrations to export.");
+      return;
+    }
+
+    const headers = [
+      "Registration ID",
+      "Tournament",
+      "Team Name",
+      "IGL Name",
+      "IGL UID",
+      "IGL Mobile",
+      "Player 2 Name",
+      "Player 2 UID",
+      "Player 3 Name",
+      "Player 3 UID",
+      "Player 4 Name",
+      "Player 4 UID",
+      "Status",
+      "Admin Note",
+      "Created At"
+    ];
+
+    const lines = [
+      headers.join(",")
+    ];
+
+    registrations.forEach(r => {
+
+      const row = [
+        r.registration_id,
+        r.tournaments?.name || "",
+        r.team_name,
+        r.igl_name,
+        r.igl_uid,
+        r.igl_mobile,
+        r.player2_name,
+        r.player2_uid,
+        r.player3_name,
+        r.player3_uid,
+        r.player4_name,
+        r.player4_uid,
+        r.status,
+        r.admin_note || "",
+        r.created_at
+      ].map(csvValue);
+
+      lines.push(row.join(","));
+    });
+
+    const blob = new Blob(
+      [lines.join("\n")],
+      { type: "text/csv;charset=utf-8;" }
     );
 
-    const loginCard = document.getElementById("loginCard");
-    const adminPanel = document.getElementById("adminPanel");
-    const loginMessage = document.getElementById("loginMessage");
+    const url = URL.createObjectURL(blob);
 
-    async function checkSession() {
-      const { data } = await client.auth.getSession();
+    const a = document.createElement("a");
 
-      if (data.session) {
-        showAdmin();
-      }
-    }
+    a.href = url;
+    a.download = "hawks-verse-registrations.csv";
 
-    function showAdmin() {
-      loginCard.style.display = "none";
-      adminPanel.style.display = "block";
-    }
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
 
-    document.getElementById("loginBtn").addEventListener("click", async () => {
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value;
+    URL.revokeObjectURL(url);
+  });
 
-      loginMessage.textContent = "Logging in...";
 
-      const { error } = await client.auth.signInWithPassword({
-        email,
-        password
-      });
+function csvValue(value) {
 
-      if (error) {
-        loginMessage.textContent = error.message;
-        return;
-      }
+  const text = String(value ?? "");
 
-      loginMessage.textContent = "";
-      showAdmin();
-    });
+  return `"${text.replaceAll('"', '""')}"`;
+}
 
-    document.getElementById("logoutBtn").addEventListener("click", async () => {
-      await client.auth.signOut();
-      adminPanel.style.display = "none";
-      loginCard.style.display = "block";
-    });
 
-    checkSession();
-  </script>
+client.auth.onAuthStateChange((event, session) => {
+
+  if (session) {
+    showAdmin();
+  } else if (event === "SIGNED_OUT") {
+    showLogin();
+  }
+});
+
+
+checkSession();
+
+</script>
+
 </body>
 </html>
