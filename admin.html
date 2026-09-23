@@ -389,10 +389,15 @@
         <input id="tClose" type="datetime-local">
       </label>
 
-      <label style="grid-column:1/-1;">
-        Poster URL
-        <input id="tPoster" type="text" placeholder="assets/weekly-wars-s3.png">
-      </label>
+     <label style="grid-column:1/-1;">
+  Tournament Poster
+  <input id="tPosterFile" type="file" accept="image/png,image/jpeg,image/webp">
+  <small style="display:block;margin-top:6px;opacity:.7;">
+    PNG, JPG or WEBP • Maximum 5 MB
+  </small>
+</label>
+
+<input id="tPoster" type="hidden">
 
       <label style="grid-column:1/-1;">
         Description
