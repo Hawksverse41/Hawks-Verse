@@ -1,16 +1,13 @@
-# HAWKS VERSE Connected Prototype
+# HAWKS VERSE LIVE
 
-This version is connected to the HAWKS VERSE Supabase project using the browser-safe Publishable key.
+Live-ready static website connected to the fresh Supabase project.
 
-Included:
-- Live tournament fetch from Supabase
-- Real registration submission through the `create_registration` RPC
-- Real registration status lookup
-- Supplied Weekly Wars posters
-- Responsive esports UI
+Supabase project URL: https://vjpysedkfnwdgjglmufq.supabase.co
 
-Important:
-- The Publishable key is designed for browser use; database access is protected by RLS and RPC functions.
-- Never put a Supabase secret/service-role key in frontend files.
-- Hosting is still required before this becomes publicly accessible.
-- Admin dashboard/authentication and participant edit flow are the next production modules.
+The browser uses only the Supabase publishable key in `config.js`. Never add a secret/service-role key to this project.
+
+## Deploy
+Upload/push all files in this folder to the GitHub repository and deploy from Vercel.
+
+## Current tournament
+HAWKS VERSE WEEKLY WARS S2 — ₹2,000 prize pool, 48 squads, free entry.
