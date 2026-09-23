@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HAWKS VERSE — Admin Panel</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #080b12;
+      color: #fff;
+    }
+
+    .wrap {
+      max-width: 1100px;
+      margin: auto;
+      padding: 30px 18px;
+    }
+
+    .logo {
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: 1px;
+    }
+
+    .logo span { color: #e50914; }
+
+    .card {
+      background: #111722;
+      border: 1px solid #252d3a;
+      border-radius: 14px;
+      padding: 24px;
+      margin-top: 24px;
+    }
+
+    input, button {
+      width: 100%;
+      padding: 13px;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+
+    input {
+      background: #080b12;
+      color: #fff;
+      border: 1px solid #303847;
+      margin: 8px 0 14px;
+    }
+
+    button {
+      border: 0;
+      background: #e50914;
+      color: white;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    button:hover { opacity: .9; }
+
+    .muted { color: #9ca6b5; }
+
+    #adminPanel { display: none; }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    .logout {
+      width: auto;
+      padding: 10px 18px;
+      background: #252d3a;
+    }
+
+    .message {
+      margin-top: 14px;
+      color: #ff6670;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+
+    <div class="logo">
+      HAWKS <span>VERSE</span>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="loginCard" class="card">
+      <h2>Admin Login</h2>
+      <p class="muted">HAWKS VERSE Tournament Management</p>
+
+      <label>Email</label>
+      <input
+        id="email"
+        type="email"
+        value="hawksverse@gmail.com"
+        placeholder="Admin email"
+      >
+
+      <label>Password</label>
+      <input
+        id="password"
+        type="password"
+        placeholder="Enter admin password"
+      >
+
+      <button id="loginBtn">LOGIN</button>
+
+      <div id="loginMessage" class="message"></div>
+    </div>
+
+    <!-- ADMIN PANEL -->
+    <div id="adminPanel">
+
+      <div class="card topbar">
+        <div>
+          <h2>Admin Dashboard</h2>
+          <div class="muted">HAWKS VERSE Management Panel</div>
+        </div>
+
+        <button class="logout" id="logoutBtn">LOGOUT</button>
+      </div>
+
+      <div class="card">
+        <h3>Dashboard</h3>
+        <p class="muted">
+          Admin panel is connected. Registration and tournament management will appear here.
+        </p>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    const client = supabase.createClient(
+      window.HAWKS_CONFIG.supabaseUrl,
+      window.HAWKS_CONFIG.supabasePublishableKey
+    );
+
+    const loginCard = document.getElementById("loginCard");
+    const adminPanel = document.getElementById("adminPanel");
+    const loginMessage = document.getElementById("loginMessage");
+
+    async function checkSession() {
+      const { data } = await client.auth.getSession();
+
+      if (data.session) {
+        showAdmin();
+      }
+    }
+
+    function showAdmin() {
+      loginCard.style.display = "none";
+      adminPanel.style.display = "block";
+    }
+
+    document.getElementById("loginBtn").addEventListener("click", async () => {
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+
+      loginMessage.textContent = "Logging in...";
+
+      const { error } = await client.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (error) {
+        loginMessage.textContent = error.message;
+        return;
+      }
+
+      loginMessage.textContent = "";
+      showAdmin();
+    });
+
+    document.getElementById("logoutBtn").addEventListener("click", async () => {
+      await client.auth.signOut();
+      adminPanel.style.display = "none";
+      loginCard.style.display = "block";
+    });
+
+    checkSession();
+  </script>
+</body>
+</html>
