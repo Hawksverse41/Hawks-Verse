@@ -1072,7 +1072,325 @@ function csvValue(value) {
 
   return `"${text.replaceAll('"', '""')}"`;
 }
+// ==================== TOURNAMENT MANAGEMENT ====================
 
+let tournaments = [];
+let editingTournamentId = null;
+
+async function loadTournaments() {
+  const list = document.getElementById("tournamentList");
+
+  list.innerHTML = '<div class="muted">Loading tournaments...</div>';
+
+  const { data, error } = await client
+    .from("tournaments")
+    .select(`
+      id,
+      slug,
+      name,
+      season,
+      prize_pool,
+      status,
+      registration_open_at,
+      registration_close_at,
+      max_squads,
+      is_published,
+      poster_url,
+      short_rules,
+      created_at
+    `)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Tournament load error:", error);
+
+    list.innerHTML = `
+      <div class="empty">
+        Failed to load tournaments.<br>
+        <span class="muted">${escapeHtml(error.message)}</span>
+      </div>
+    `;
+
+    return;
+  }
+
+  tournaments = data || [];
+  renderTournaments();
+  fillGroupTournamentSelect();
+}
+
+function renderTournaments() {
+  const list = document.getElementById("tournamentList");
+
+  if (!tournaments.length) {
+    list.innerHTML =
+      '<div class="empty">No tournaments found.</div>';
+    return;
+  }
+
+  list.innerHTML = tournaments.map(t => `
+    <div style="
+      border:1px solid #252d3a;
+      border-radius:10px;
+      padding:15px;
+      margin-bottom:12px;
+      background:#0c111a;
+    ">
+      <div style="
+        display:flex;
+        justify-content:space-between;
+        gap:12px;
+        flex-wrap:wrap;
+      ">
+        <div>
+          <strong>${escapeHtml(t.name)}</strong>
+          ${t.season
+            ? `<span class="muted"> — ${escapeHtml(t.season)}</span>`
+            : ""}
+
+          <div class="muted" style="margin-top:6px;">
+            ${escapeHtml(t.slug)}
+            · ₹${Number(t.prize_pool || 0).toLocaleString("en-IN")}
+            · ${escapeHtml(t.status)}
+            · ${t.is_published ? "Published" : "Unpublished"}
+          </div>
+        </div>
+
+        <button
+          class="secondary"
+          onclick="editTournament('${t.id}')"
+        >
+          EDIT
+        </button>
+      </div>
+    </div>
+  `).join("");
+}
+
+function openTournamentForm() {
+  editingTournamentId = null;
+
+  document.getElementById("tournamentForm").style.display = "block";
+
+  document.getElementById("tournamentMessage").textContent =
+    "Create a new tournament.";
+
+  document.getElementById("tName").value = "";
+  document.getElementById("tSlug").value = "";
+  document.getElementById("tSeason").value = "";
+  document.getElementById("tPrize").value = "0";
+  document.getElementById("tStatus").value = "upcoming";
+  document.getElementById("tMaxSquads").value = "48";
+  document.getElementById("tOpen").value = "";
+  document.getElementById("tClose").value = "";
+  document.getElementById("tPoster").value = "";
+  document.getElementById("tDescription").value = "";
+  document.getElementById("tRules").value =
+    "Free entry. Squad of 4 compulsory.";
+  document.getElementById("tPublished").checked = false;
+
+  document.getElementById("saveTournamentBtn").textContent =
+    "SAVE TOURNAMENT";
+}
+
+window.openTournamentModal = openTournamentForm;
+
+window.editTournament = function(id) {
+  const t = tournaments.find(x => x.id === id);
+
+  if (!t) return;
+
+  editingTournamentId = id;
+
+  document.getElementById("tournamentForm").style.display = "block";
+
+  document.getElementById("tournamentMessage").textContent =
+    "Editing tournament.";
+
+  document.getElementById("tName").value = t.name || "";
+  document.getElementById("tSlug").value = t.slug || "";
+  document.getElementById("tSeason").value = t.season || "";
+  document.getElementById("tPrize").value = t.prize_pool || 0;
+  document.getElementById("tStatus").value =
+    t.status || "upcoming";
+  document.getElementById("tMaxSquads").value =
+    t.max_squads || 48;
+
+  document.getElementById("tOpen").value =
+    toDatetimeLocal(t.registration_open_at);
+
+  document.getElementById("tClose").value =
+    toDatetimeLocal(t.registration_close_at);
+
+  document.getElementById("tPoster").value =
+    t.poster_url || "";
+
+  document.getElementById("tRules").value =
+    t.short_rules || "";
+
+  document.getElementById("tPublished").checked =
+    !!t.is_published;
+
+  document.getElementById("saveTournamentBtn").textContent =
+    "UPDATE TOURNAMENT";
+
+  document.getElementById("tournamentForm")
+    .scrollIntoView({
+      behavior: "smooth",
+      block: "start"
+    });
+};
+
+function toDatetimeLocal(value) {
+  if (!value) return "";
+
+  const d = new Date(value);
+
+  if (Number.isNaN(d.getTime())) return "";
+
+  const pad = n => String(n).padStart(2, "0");
+
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function fromDatetimeLocal(value) {
+  if (!value) return null;
+
+  const d = new Date(value);
+
+  if (Number.isNaN(d.getTime())) return null;
+
+  return d.toISOString();
+}
+
+async function saveTournament() {
+  const message =
+    document.getElementById("tournamentMessage");
+
+  const name =
+    document.getElementById("tName").value.trim();
+
+  const slug =
+    document.getElementById("tSlug").value.trim();
+
+  if (!name || !slug) {
+    message.textContent =
+      "Tournament Name and Slug are required.";
+    return;
+  }
+
+  const payload = {
+    name,
+    slug,
+    season:
+      document.getElementById("tSeason").value.trim() || null,
+
+    prize_pool:
+      Number(document.getElementById("tPrize").value || 0),
+
+    status:
+      document.getElementById("tStatus").value,
+
+    max_squads:
+      Number(document.getElementById("tMaxSquads").value || 48),
+
+    registration_open_at:
+      fromDatetimeLocal(
+        document.getElementById("tOpen").value
+      ),
+
+    registration_close_at:
+      fromDatetimeLocal(
+        document.getElementById("tClose").value
+      ),
+
+    poster_url:
+      document.getElementById("tPoster").value.trim() || null,
+
+    short_rules:
+      document.getElementById("tRules").value.trim() || null,
+
+    is_published:
+      document.getElementById("tPublished").checked
+  };
+
+  message.textContent = "Saving tournament...";
+
+  let result;
+
+  if (editingTournamentId) {
+    result = await client
+      .from("tournaments")
+      .update(payload)
+      .eq("id", editingTournamentId);
+  } else {
+    result = await client
+      .from("tournaments")
+      .insert(payload);
+  }
+
+  if (result.error) {
+    console.error("Tournament save error:", result.error);
+
+    message.textContent =
+      "Save failed: " + result.error.message;
+
+    return;
+  }
+
+  message.textContent =
+    editingTournamentId
+      ? "Tournament updated successfully."
+      : "Tournament created successfully.";
+
+  document.getElementById("tournamentForm").style.display =
+    "none";
+
+  editingTournamentId = null;
+
+  await loadTournaments();
+}
+
+document.getElementById("newTournamentBtn")
+  .addEventListener("click", openTournamentForm);
+
+document.getElementById("cancelTournamentBtn")
+  .addEventListener("click", () => {
+    editingTournamentId = null;
+
+    document.getElementById("tournamentForm").style.display =
+      "none";
+
+    document.getElementById("tournamentMessage").textContent =
+      "";
+  });
+
+document.getElementById("saveTournamentBtn")
+  .addEventListener("click", saveTournament);
+
+function fillGroupTournamentSelect() {
+  const select =
+    document.getElementById("groupTournament");
+
+  if (!select) return;
+
+  select.innerHTML =
+    '<option value="">Select tournament</option>' +
+    tournaments.map(t => `
+      <option value="${t.id}">
+        ${escapeHtml(t.name)}
+        ${t.season ? " " + escapeHtml(t.season) : ""}
+      </option>
+    `).join("");
+}
+
+// Make tournament loading happen whenever admin panel opens.
+const oldShowAdmin = showAdmin;
+
+showAdmin = function() {
+  oldShowAdmin();
+  loadTournaments();
+};
 
 client.auth.onAuthStateChange((event, session) => {
 
