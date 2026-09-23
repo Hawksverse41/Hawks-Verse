@@ -329,7 +329,165 @@
       </div>
 
 
-      <!-- REGISTRATIONS -->
+      
+      <!-- TOURNAMENT MANAGEMENT -->
+<div class="card" style="margin-top:20px;">
+  <div class="topbar">
+    <div>
+      <h2>Tournaments</h2>
+      <div class="muted">Create and manage tournaments</div>
+    </div>
+    <button id="newTournamentBtn" class="secondary">+ NEW TOURNAMENT</button>
+  </div>
+
+  <div id="tournamentMessage" class="muted" style="margin:12px 0;"></div>
+
+  <div id="tournamentForm" style="display:none;">
+    <div class="grid">
+
+      <label>
+        Tournament Name
+        <input id="tName" type="text" placeholder="HAWKS VERSE WEEKLY WARS S3">
+      </label>
+
+      <label>
+        Slug
+        <input id="tSlug" type="text" placeholder="weekly-wars-s3">
+      </label>
+
+      <label>
+        Season
+        <input id="tSeason" type="text" placeholder="S3">
+      </label>
+
+      <label>
+        Prize Pool (INR)
+        <input id="tPrize" type="number" min="0" value="0">
+      </label>
+
+      <label>
+        Status
+        <select id="tStatus">
+          <option value="upcoming">Upcoming</option>
+          <option value="ongoing">Ongoing</option>
+          <option value="completed">Completed</option>
+        </select>
+      </label>
+
+      <label>
+        Max Squads
+        <input id="tMaxSquads" type="number" min="1" value="48">
+      </label>
+
+      <label>
+        Registration Opens
+        <input id="tOpen" type="datetime-local">
+      </label>
+
+      <label>
+        Registration Closes
+        <input id="tClose" type="datetime-local">
+      </label>
+
+      <label style="grid-column:1/-1;">
+        Poster URL
+        <input id="tPoster" type="text" placeholder="assets/weekly-wars-s3.png">
+      </label>
+
+      <label style="grid-column:1/-1;">
+        Description
+        <textarea id="tDescription" rows="3"
+          placeholder="Tournament details..."></textarea>
+      </label>
+
+      <label style="grid-column:1/-1;">
+        Rules
+        <textarea id="tRules" rows="4"
+          placeholder="Free entry. Squad of 4 compulsory..."></textarea>
+      </label>
+
+      <label style="display:flex;align-items:center;gap:8px;">
+        <input id="tPublished" type="checkbox">
+        Publish tournament
+      </label>
+
+    </div>
+
+    <div style="margin-top:15px;display:flex;gap:10px;">
+      <button id="saveTournamentBtn">SAVE TOURNAMENT</button>
+      <button id="cancelTournamentBtn" class="secondary">CANCEL</button>
+    </div>
+  </div>
+
+  <div id="tournamentList" style="margin-top:20px;">
+    <div class="muted">Loading tournaments...</div>
+  </div>
+</div>
+
+
+<!-- GROUP MANAGEMENT -->
+<div class="card" style="margin-top:20px;">
+  <div class="topbar">
+    <div>
+      <h2>Groups</h2>
+      <div class="muted">Manage tournament groups</div>
+    </div>
+  </div>
+
+  <div class="grid">
+
+    <label>
+      Tournament
+      <select id="groupTournament">
+        <option value="">Select tournament</option>
+      </select>
+    </label>
+
+    <label>
+      Group Name
+      <input id="groupName" type="text" placeholder="Group A">
+    </label>
+
+    <label>
+      Group Number
+      <input id="groupNumber" type="number" min="1" value="1">
+    </label>
+
+    <label>
+      Max Slots
+      <input id="groupSlots" type="number" min="1" value="12">
+    </label>
+
+    <label style="grid-column:1/-1;">
+      WhatsApp Group Link
+      <input id="groupWhatsapp" type="text"
+        placeholder="https://chat.whatsapp.com/...">
+    </label>
+
+    <label style="grid-column:1/-1;">
+      Instructions
+      <textarea id="groupInstructions" rows="3"
+        placeholder="Join the WhatsApp group using the link above..."></textarea>
+    </label>
+
+    <label style="display:flex;align-items:center;gap:8px;">
+      <input id="groupPublished" type="checkbox">
+      Publish group
+    </label>
+
+  </div>
+
+  <div style="margin-top:15px;">
+    <button id="saveGroupBtn">SAVE GROUP</button>
+  </div>
+
+  <div id="groupList" style="margin-top:20px;">
+    <div class="muted">Select a tournament to view groups.</div>
+  </div>
+</div>
+
+
+<!-- REGISTRATIONS -->
       <div class="card" style="margin-top:20px;">
 
         <div class="topbar">
