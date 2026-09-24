@@ -13,10 +13,9 @@ async function boot() {
 
     let r = await db
       .from("tournaments")
-      .select("id,name")
-      .eq("slug", "weekly-wars-s2")
-      .eq("is_published", true)
-      .maybeSingle();
+      .select("*")
+.eq("is_published", true)
+.order("created_at", { ascending: false });
 
     if (r.error) throw r.error;
     if (!r.data) throw Error("Tournament unavailable");
