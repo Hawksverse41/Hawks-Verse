@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Register | HAWKS VERSE</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+<header>
+  <a class="logo" href="index.html">HAWKS <b>VERSE</b></a>
+
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="index.html#tournaments">Tournaments</a>
+    <a class="join" href="https://whatsapp.com/channel/0029Vb2yCJL7T8bbrrUey840" target="_blank">
+      JOIN HAWKS VERSE
+    </a>
+  </nav>
+</header>
+
+<main>
+
+<section id="register">
+  <small>TOURNAMENT REGISTRATION</small>
+  <h1 id="formTitle">REGISTER YOUR TEAM</h1>
+
+  <p>
+    Free Fire MAX squad registration. 4 players are compulsory.
+    Only the IGL needs to submit the registration.
+  </p>
+
+  <div id="dbStatus">Connecting to database...</div>
+
+  <form id="reg">
+
+    <input type="hidden" id="tid">
+
+    <input id="team" placeholder="Team / Squad Name" required>
+
+    <input id="igl" placeholder="IGL In-Game Name" required>
+    <input id="uid1" placeholder="IGL UID" required>
+    <input id="mobile" placeholder="IGL Mobile Number" required>
+
+    <input id="p2" placeholder="Player 2 In-Game Name" required>
+    <input id="uid2" placeholder="Player 2 UID" required>
+
+    <input id="p3" placeholder="Player 3 In-Game Name" required>
+    <input id="uid3" placeholder="Player 3 UID" required>
+
+    <input id="p4" placeholder="Player 4 In-Game Name" required>
+    <input id="uid4" placeholder="Player 4 UID" required>
+
+    <label class="consent">
+      <input type="checkbox" id="consent" required>
+      I confirm that the information submitted is correct and may be used for tournament verification.
+    </label>
+
+    <button class="btn primary" type="submit">
+      SUBMIT REGISTRATION
+    </button>
+
+  </form>
+
+  <div id="result"></div>
+
+</section>
+
+</main>
+
+<footer>
+  <b>HAWKS <i>VERSE</i></b>
+  <span>PLAY. COMPETE. RISE.</span>
+
+  <a href="https://whatsapp.com/channel/0029Vb2yCJL7T8bbrrUey840" target="_blank">
+    WhatsApp Community
+  </a>
+
+  <span>© HAWKS VERSE</span>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+
+</body>
+</html>
