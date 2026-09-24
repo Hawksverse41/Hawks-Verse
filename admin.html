@@ -1318,7 +1318,53 @@ async function saveTournament() {
     is_published:
       document.getElementById("tPublished").checked
   };
+const posterFile = document.getElementById("tPosterFile")?.files?.[0];
 
+if (posterFile) {
+  const allowedTypes = ["image/png", "image/jpeg", "image/webp"];
+
+  if (!allowedTypes.includes(posterFile.type)) {
+    message.textContent = "Please select PNG, JPG or WEBP image.";
+    return;
+  }
+
+  if (posterFile.size > 5 * 1024 * 1024) {
+    message.textContent = "Poster must be smaller than 5 MB.";
+    return;
+  }
+
+  const extension = posterFile.type === "image/png"
+    ? "png"
+    : posterFile.type === "image/webp"
+      ? "webp"
+      : "jpg";
+
+  const filePath =
+    "tournaments/" +
+    Date.now() +
+    "-" +
+    Math.random().toString(36).slice(2, 8) +
+    "." +
+    extension;
+
+  const uploadResult = await client.storage
+    .from("tournament-posters")
+    .upload(filePath, posterFile, {
+      contentType: posterFile.type,
+      upsert: false
+    });
+
+  if (uploadResult.error) {
+    message.textContent = "Poster upload failed: " + uploadResult.error.message;
+    return;
+  }
+
+  const publicResult = client.storage
+    .from("tournament-posters")
+    .getPublicUrl(filePath);
+
+  payload.poster_url = publicResult.data.publicUrl;
+}
   message.textContent = "Saving tournament...";
 
   let result;
