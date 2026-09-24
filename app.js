@@ -22,7 +22,26 @@ async function boot() {
 t = r.data?.[0];
 
 if (!t) throw Error("Tournament unavailable");
-   
+  const poster = t.poster_url || "assets/weekly-wars-s2.png";
+
+if ($("heroPoster")) $("heroPoster").src = poster;
+if ($("tournamentPoster")) $("tournamentPoster").src = poster;
+
+if ($("heroName")) $("heroName").textContent = t.name;
+if ($("tournamentName")) $("tournamentName").textContent = t.name;
+if ($("formTitle")) $("formTitle").textContent = t.name;
+
+if ($("heroPrize")) {
+  $("heroPrize").textContent = `₹${Number(t.prize_pool || 0).toLocaleString("en-IN")} PRIZE POOL`;
+}
+
+if ($("prizeFact")) {
+  $("prizeFact").textContent = `₹${Number(t.prize_pool || 0).toLocaleString("en-IN")}`;
+}
+
+if ($("heroStatus")) {
+  $("heroStatus").textContent = String(t.status || "UPCOMING").toUpperCase();
+} 
     $("tid").value = t.id;
     $("dbStatus").textContent =
       "✓ Database connected — registration ready.";
