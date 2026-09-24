@@ -18,9 +18,11 @@ async function boot() {
 .order("created_at", { ascending: false });
 
     if (r.error) throw r.error;
-    if (!r.data) throw Error("Tournament unavailable");
+    
+t = r.data?.[0];
 
-    t = r.data;
+if (!t) throw Error("Tournament unavailable");
+   
     $("tid").value = t.id;
     $("dbStatus").textContent =
       "✓ Database connected — registration ready.";
