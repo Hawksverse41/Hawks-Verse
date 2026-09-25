@@ -149,7 +149,118 @@
 
   <div id="checkResult"></div>
 </section>
+<section id="edit-registration">
+  <small>REGISTRATION MANAGEMENT</small>
+  <h2>EDIT REGISTRATION.</h2>
+  <p>
+    Enter your Registration ID and IGL Mobile Number to access
+    and edit your registration.
+  </p>
 
+  <form id="editVerify">
+    <input
+      id="editRid"
+      type="text"
+      placeholder="Registration ID (e.g. HV-FM-013)"
+      required
+    >
+
+    <input
+      id="editMobile"
+      type="tel"
+      placeholder="IGL Mobile Number"
+      required
+    >
+
+    <button class="btn" type="submit">VERIFY & EDIT</button>
+  </form>
+
+  <div id="editMessage"></div>
+
+  <form id="editForm" style="display:none;">
+
+    <input type="hidden" id="editOriginalRid">
+    <input type="hidden" id="editOriginalMobile">
+
+    <input
+      id="editTeam"
+      type="text"
+      placeholder="Team / Squad Name"
+      required
+    >
+
+    <input
+      id="editIgl"
+      type="text"
+      placeholder="IGL In-Game Name"
+      required
+    >
+
+    <input
+      id="editIglUid"
+      type="text"
+      placeholder="IGL UID"
+      required
+    >
+
+    <input
+      id="editNewMobile"
+      type="tel"
+      placeholder="IGL Mobile Number"
+      required
+    >
+
+    <input
+      id="editP2"
+      type="text"
+      placeholder="Player 2 In-Game Name"
+      required
+    >
+
+    <input
+      id="editUid2"
+      type="text"
+      placeholder="Player 2 UID"
+      required
+    >
+
+    <input
+      id="editP3"
+      type="text"
+      placeholder="Player 3 In-Game Name"
+      required
+    >
+
+    <input
+      id="editUid3"
+      type="text"
+      placeholder="Player 3 UID"
+      required
+    >
+
+    <input
+      id="editP4"
+      type="text"
+      placeholder="Player 4 In-Game Name"
+      required
+    >
+
+    <input
+      id="editUid4"
+      type="text"
+      placeholder="Player 4 UID"
+      required
+    >
+
+    <div id="editCurrentStatus"></div>
+
+    <button class="btn primary" type="submit">
+      SAVE CHANGES
+    </button>
+  </form>
+
+  <div id="editResult"></div>
+</section>
 <section id="faq">
   <small>FAQ</small>
   <h2>QUICK ANSWERS.</h2>
