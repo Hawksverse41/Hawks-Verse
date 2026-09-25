@@ -1,9 +1,16 @@
 const C = window.HAWKS_CONFIG || {};
-let db = null, t = null;
+let db = null;
+let t = null;
+
 const $ = id => document.getElementById(id);
 
 async function boot() {
-  if (!C.supabaseUrl || !C.supabasePublishableKey) return;
+  if (!C.supabaseUrl || !C.supabasePublishableKey) {
+    if ($("dbStatus")) {
+      $("dbStatus").textContent = "Database configuration missing.";
+    }
+    return;
+  }
 
   try {
     db = supabase.createClient(
@@ -11,109 +18,195 @@ async function boot() {
       C.supabasePublishableKey
     );
 
-    let r = await db
+    const r = await db
       .from("tournaments")
       .select("*")
-.eq("is_published", true)
-.order("created_at", { ascending: false });
+      .eq("is_published", true)
+      .order("created_at", { ascending: false });
 
     if (r.error) throw r.error;
-    
-t = r.data?.[0];
 
-if (!t) throw Error("Tournament unavailable");
-  const poster = t.poster_url || "assets/weekly-wars-s2.png";
+    t = r.data?.[0];
 
-if ($("heroPoster")) $("heroPoster").src = poster;
-if ($("tournamentPoster")) $("tournamentPoster").src = poster;
+    if (!t) {
+      throw new Error("Tournament unavailable");
+    }
 
-if ($("heroName")) $("heroName").textContent = t.name;
-if ($("tournamentName")) $("tournamentName").textContent = t.name;
-if ($("formTitle")) $("formTitle").textContent = t.name;
+    const poster =
+      t.poster_url || "assets/weekly-wars-s2.png";
 
-if ($("heroPrize")) {
-  $("heroPrize").textContent = `₹${Number(t.prize_pool || 0).toLocaleString("en-IN")} PRIZE POOL`;
-}
+    // Homepage
+    if ($("heroPoster")) $("heroPoster").src = poster;
+    if ($("tournamentPoster")) $("tournamentPoster").src = poster;
 
-if ($("prizeFact")) {
-  $("prizeFact").textContent = `₹${Number(t.prize_pool || 0).toLocaleString("en-IN")}`;
-}
+    if ($("heroName")) {
+      $("heroName").textContent = t.name;
+    }
 
-if ($("heroStatus")) {
-  $("heroStatus").textContent = String(t.status || "UPCOMING").toUpperCase();
-} 
-    $("tid").value = t.id;
-    $("dbStatus").textContent =
-      "✓ Database connected — registration ready.";
-    $("dbStatus").className = "ok";
+    if ($("tournamentName")) {
+      $("tournamentName").textContent = t.name;
+    }
+
+    if ($("formTitle")) {
+      $("formTitle").textContent = t.name;
+    }
+
+    if ($("heroPrize")) {
+      $("heroPrize").textContent =
+        `₹${Number(t.prize_pool || 0).toLocaleString("en-IN")} PRIZE POOL`;
+    }
+
+    if ($("prizeFact")) {
+      $("prizeFact").textContent =
+        `₹${Number(t.prize_pool || 0).toLocaleString("en-IN")}`;
+    }
+
+    if ($("heroStatus")) {
+      $("heroStatus").textContent =
+        String(t.status || "UPCOMING").toUpperCase();
+    }
+
+    // Registration page
+    if ($("tid")) {
+      $("tid").value = t.id;
+    }
+
+    if ($("dbStatus")) {
+      $("dbStatus").textContent =
+        "✓ Database connected — registration ready.";
+      $("dbStatus").className = "ok";
+    }
+
   } catch (e) {
-    console.error(e);
+    console.error("HAWKS VERSE:", e);
+
+    if ($("dbStatus")) {
+      $("dbStatus").textContent =
+        "Database connection failed. Please try again.";
+      $("dbStatus").className = "error";
+    }
   }
 }
 
-$("reg").onsubmit = async e => {
-  e.preventDefault();
 
-  if (!db || !t)
-    return alert("Database is not connected yet.");
+// ===============================
+// REGISTRATION
+// ===============================
 
-  let p = {
-    p_tournament_id: t.id,
-    p_team_name: $("team").value.trim(),
-    p_team_logo_url: "",
-    p_igl_name: $("igl").value.trim(),
-    p_igl_uid: $("uid").value.trim(),
-    p_igl_mobile: $("mobile").value.trim(),
-    p_player2_name: $("p2").value.trim(),
-    p_player2_uid: $("u2").value.trim(),
-    p_player3_name: $("p3").value.trim(),
-    p_player3_uid: $("u3").value.trim(),
-    p_player4_name: $("p4").value.trim(),
-    p_player4_uid: $("u4").value.trim()
-  };
+const registrationForm = $("reg");
 
-  let r = await db.rpc("create_registration", p);
+if (registrationForm) {
+  registrationForm.onsubmit = async e => {
+    e.preventDefault();
 
-  if (r.error)
-    return alert(r.error.message);
+    if (!db || !t) {
+      alert("Database is not connected yet.");
+      return;
+    }
 
-  let id = Array.isArray(r.data)
-    ? r.data[0]?.registration_id
-    : r.data?.registration_id ?? r.data;
+    const p = {
+      p_tournament_id: t.id,
+      p_team_name: $("team").value.trim(),
+      p_team_logo_url: "",
+      p_igl_name: $("igl").value.trim(),
+      p_igl_uid: $("uid1").value.trim(),
+      p_igl_mobile: $("mobile").value.trim(),
+      p_player2_name: $("p2").value.trim(),
+      p_player2_uid: $("uid2").value.trim(),
+      p_player3_name: $("p3").value.trim(),
+      p_player3_uid: $("uid3").value.trim(),
+      p_player4_name: $("p4").value.trim(),
+      p_player4_uid: $("uid4").value.trim()
+    };
 
-  if (!id)
-    return alert(
-      "Registration created, but Registration ID could not be read. Check database."
+    const r = await db.rpc(
+      "create_registration",
+      p
     );
 
-  $("success").innerHTML =
-    "<b>REGISTRATION SUCCESSFUL</b><br>" +
-    "Registration ID: <strong>" + id + "</strong><br>" +
-    "Save this ID for status checks.";
+    if (r.error) {
+      alert(r.error.message);
+      return;
+    }
 
-  $("reg").reset();
-};
+    const id = Array.isArray(r.data)
+      ? r.data[0]?.registration_id
+      : r.data?.registration_id ?? r.data;
 
-$("check").onsubmit = async e => {
-  e.preventDefault();
+    if (!id) {
+      alert(
+        "Registration created, but Registration ID could not be read."
+      );
+      return;
+    }
 
-  if (!db)
-    return alert("Database is not connected yet.");
+    if ($("result")) {
+      $("result").innerHTML =
+        "<b>REGISTRATION SUCCESSFUL</b><br>" +
+        "Registration ID: <strong>" +
+        id +
+        "</strong><br>" +
+        "Save this ID for status checks.";
+    }
 
-  let r = await db.rpc("check_registration", {
-    p_registration_id: $("rid").value.trim()
-  });
+    registrationForm.reset();
+  };
+}
 
-  if (r.error)
-    return $("result").textContent = "Registration not found.";
 
-  let x = Array.isArray(r.data) ? r.data[0] : r.data;
+// ===============================
+// REGISTRATION STATUS CHECK
+// ===============================
 
-  $("result").innerHTML = x
-    ? "Team: <b>" + x.team_name + "</b><br>" +
-      "Status: <b>" + x.status + "</b><br>" +
-      "Registration ID: <b>" + x.registration_id + "</b>"
-    : "Registration not found.";
-};
+const checkForm = $("check");
 
+if (checkForm) {
+  checkForm.onsubmit = async e => {
+    e.preventDefault();
+
+    if (!db) {
+      alert("Database is not connected yet.");
+      return;
+    }
+
+    const registrationId =
+      $("rid").value.trim();
+
+    if (!registrationId) {
+      return;
+    }
+
+    const r = await db.rpc(
+      "check_registration",
+      {
+        p_registration_id: registrationId
+      }
+    );
+
+    if (r.error) {
+      if ($("checkResult")) {
+        $("checkResult").textContent =
+          "Registration not found.";
+      }
+      return;
+    }
+
+    const x = Array.isArray(r.data)
+      ? r.data[0]
+      : r.data;
+
+    if ($("checkResult")) {
+      $("checkResult").innerHTML = x
+        ? "Team: <b>" + x.team_name + "</b><br>" +
+          "Status: <b>" + x.status + "</b><br>" +
+          "Registration ID: <b>" +
+          x.registration_id +
+          "</b>"
+        : "Registration not found.";
+    }
+  };
+}
+
+
+// Start
 boot();
