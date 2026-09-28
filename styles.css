@@ -1156,3 +1156,26 @@ footer{
 .site-header .logo span b{
   color:var(--purple,#a855f7);
 }
+/* PREMIUM HEADER BRANDING */
+.site-header .logo{
+  gap:14px;
+}
+
+.site-header .logo img{
+  width:62px;
+  height:62px;
+  object-fit:contain;
+  border-radius:8px;
+}
+
+.site-header .logo span{
+  font-family:Orbitron,Arial,sans-serif;
+  font-size:18px;
+  font-weight:800;
+  letter-spacing:1px;
+}
+
+.site-header .logo span b{
+  color:#ff3b5c;
+  letter-spacing:3px;
+}
