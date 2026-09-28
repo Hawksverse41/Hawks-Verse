@@ -111,6 +111,7 @@ if (registrationForm) {
       p_igl_name: $("igl").value.trim(),
       p_igl_uid: $("uid1").value.trim(),
       p_igl_mobile: $("mobile").value.trim(),
+      p_igl_email: $("email").value.trim(),
       p_player2_name: $("p2").value.trim(),
       p_player2_uid: $("uid2").value.trim(),
       p_player3_name: $("p3").value.trim(),
