@@ -3,83 +3,199 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+
 <title>HAWKS VERSE | Free Fire MAX Esports</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+
 <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
 
-<header>
-  <a class="logo" href="#">HAWKS <b>VERSE</b></a>
+<header class="site-header">
+
+  <a class="logo" href="#">
+    <span class="logo-mark">⚡</span>
+    <span>
+      HAWKS
+      <b>VERSE</b>
+    </span>
+  </a>
 
   <nav>
     <a href="#tournaments">Tournaments</a>
     <a href="#how">How to Register</a>
     <a href="#faq">FAQ</a>
-    <a class="join" href="https://whatsapp.com/channel/0029Vb2yCJL7T8bbrrUey840" target="_blank">
-      JOIN HAWKS VERSE
+
+    <a
+      class="join"
+      href="https://whatsapp.com/channel/0029Vb2yCJL7T8bbrrUey840"
+      target="_blank"
+      rel="noopener"
+    >
+      <span>◉</span> JOIN WHATSAPP <b>→</b>
     </a>
   </nav>
+
 </header>
+
 
 <main>
 
-<section class="hero">
-  <div>
-    <small>FREE FIRE MAX • ESPORTS • COMMUNITY</small>
-    <h1>PLAY. <em>COMPETE.</em><br>RISE WITH THE HAWKS.</h1>
-    <p>Free-entry Free Fire MAX tournaments built for competitive squads.</p>
+<!-- HERO -->
 
-    <div class="announce">
-      🔴 <b>HAWKS VERSE TOURNAMENTS</b> — REGISTRATION OPEN
+<section class="hero">
+
+  <div class="hero-copy">
+
+    <small class="eyebrow">FREE FIRE MAX • ESPORTS • COMMUNITY</small>
+
+    <h1>
+      PLAY.
+      <em>COMPETE.</em>
+      <br>
+      GROW WITH THE HAWKS.
+    </h1>
+
+    <p>
+      Free-entry Free Fire MAX tournaments built for competitive squads
+      and a growing gaming community.
+    </p>
+
+    <div class="hero-actions">
+      <a href="#register" class="btn primary">
+        REGISTER HERE <span>→</span>
+      </a>
+
+      <a href="#status" class="btn ghost">
+        CHECK REGISTRATION
+      </a>
     </div>
+
+    <div class="hero-points">
+      <span>✦ FREE ENTRY</span>
+      <span>✦ 4 PLAYER SQUADS</span>
+      <span>✦ REGULAR TOURNAMENTS</span>
+    </div>
+
   </div>
 
+
   <div class="hero-card">
+
     <div class="hero-card-top">
-      <span id="heroStatus">LOADING</span>
+      <span id="heroStatus" class="status-pill">LOADING</span>
       <small>FREE ENTRY</small>
     </div>
 
-    <img id="heroPoster" src="assets/weekly-wars-s2.png" alt="HAWKS VERSE Tournament">
+    <div class="poster-wrap">
+      <img
+        id="heroPoster"
+        src="assets/weekly-wars-s2.png"
+        alt="HAWKS VERSE Tournament"
+      >
+    </div>
 
     <div class="hero-card-bottom">
+
       <div>
+        <small>FEATURED TOURNAMENT</small>
         <strong id="heroName">LOADING...</strong>
         <span id="heroPrize">₹0 PRIZE POOL</span>
       </div>
-      <a href="#register" class="arrow">→</a>
+
+      <a href="#register" class="round-arrow">→</a>
+
     </div>
+
   </div>
+
 </section>
 
-<section id="tournaments">
-  <small>TOURNAMENTS</small>
-  <h2>ENTER THE BATTLE.</h2>
 
-  <div class="card">
-    <img id="tournamentPoster" src="assets/weekly-wars-s2.png" alt="HAWKS VERSE Tournament">
+<!-- MINI STATS -->
 
+<section class="mini-stats">
+
+  <div>
+    <span class="stat-icon">♛</span>
     <div>
+      <b>FAIR</b>
+      <small>TOURNAMENTS</small>
+    </div>
+  </div>
+
+  <div>
+    <span class="stat-icon">◆</span>
+    <div>
+      <b>SECURE</b>
+      <small>REGISTRATIONS</small>
+    </div>
+  </div>
+
+  <div>
+    <span class="stat-icon">♟</span>
+    <div>
+      <b>ACTIVE</b>
+      <small>COMMUNITY</small>
+    </div>
+  </div>
+
+</section>
+
+
+<!-- TOURNAMENTS -->
+
+<section id="tournaments" class="section">
+
+  <div class="section-heading">
+    <div>
+      <small>TOURNAMENTS</small>
+      <h2>ENTER THE <em>BATTLE.</em></h2>
+    </div>
+
+    <a href="#register" class="text-link">
+      REGISTER NOW →
+    </a>
+  </div>
+
+
+  <div class="tournament-card">
+
+    <div class="tournament-poster">
+      <img
+        id="tournamentPoster"
+        src="assets/weekly-wars-s2.png"
+        alt="HAWKS VERSE Tournament"
+      >
+    </div>
+
+    <div class="tournament-info">
+
       <p class="kicker">CURRENT TOURNAMENT</p>
 
       <h3 id="tournamentName">LOADING...</h3>
 
       <div class="facts">
+
         <span>
           <b id="prizeFact">₹0</b>
-          <small>Prize Pool</small>
+          <small>PRIZE POOL</small>
         </span>
 
         <span>
-          <b>4 PLAYERS</b>
-          <small>Squad Required</small>
+          <b>4</b>
+          <small>PLAYERS</small>
         </span>
 
         <span>
           <b>FREE</b>
-          <small>Entry Fee</small>
+          <small>ENTRY FEE</small>
         </span>
+
       </div>
 
       <p>
@@ -87,222 +203,466 @@
         One IGL registers the complete four-player squad.
       </p>
 
-      <a class="btn primary" href="#register">REGISTER HERE</a>
+      <a class="btn primary" href="#register">
+        REGISTER HERE <span>→</span>
+      </a>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- HOW TO REGISTER -->
+
+<section id="how" class="section">
+
+  <div class="section-heading">
+    <div>
+      <small>HOW IT WORKS</small>
+      <h2>4 SIMPLE <em>STEPS.</em></h2>
     </div>
   </div>
-</section>
-
-<section id="how">
-  <small>HOW IT WORKS</small>
-  <h2>4 SIMPLE STEPS.</h2>
 
   <div class="steps">
-    <div><b>01</b><span>Choose the active tournament</span></div>
-    <div><b>02</b><span>Click REGISTER HERE</span></div>
-    <div><b>03</b><span>Fill your 4-player squad details</span></div>
-    <div><b>04</b><span>Save your Registration ID</span></div>
+
+    <div class="step-card">
+      <b>01</b>
+      <span>Choose the active tournament</span>
+      <small>Pick the tournament you want to enter.</small>
+    </div>
+
+    <div class="step-card">
+      <b>02</b>
+      <span>Click REGISTER HERE</span>
+      <small>Start your squad registration.</small>
+    </div>
+
+    <div class="step-card">
+      <b>03</b>
+      <span>Fill squad details</span>
+      <small>Enter all 4 players correctly.</small>
+    </div>
+
+    <div class="step-card">
+      <b>04</b>
+      <span>Save your Registration ID</span>
+      <small>Use it later to check your status.</small>
+    </div>
+
   </div>
+
 </section>
 
-<section id="register">
-  <small>REGISTRATION</small>
-  <h2 id="formTitle">REGISTER YOUR TEAM.</h2>
 
-  <div id="dbStatus">Connecting to database...</div>
+<!-- REGISTRATION -->
 
-  <form id="reg">
-    <input type="hidden" id="tid">
+<section id="register" class="section registration-section">
 
-    <input id="team" placeholder="Team / Squad Name" required>
-    <input id="igl" placeholder="IGL In-Game Name" required>
-    <input id="uid1" placeholder="IGL UID" required>
-    <input id="mobile" placeholder="IGL Mobile Number" required>
+  <div class="section-heading">
+    <div>
+      <small>TOURNAMENT REGISTRATION</small>
+      <h2>REGISTER YOUR <em>TEAM.</em></h2>
+    </div>
+  </div>
 
-    <input id="p2" placeholder="Player 2 In-Game Name" required>
-    <input id="uid2" placeholder="Player 2 UID" required>
+  <div class="form-shell">
 
-    <input id="p3" placeholder="Player 3 In-Game Name" required>
-    <input id="uid3" placeholder="Player 3 UID" required>
+    <div id="dbStatus" class="db-status">
+      Connecting to database...
+    </div>
 
-    <input id="p4" placeholder="Player 4 In-Game Name" required>
-    <input id="uid4" placeholder="Player 4 UID" required>
+    <form id="reg">
 
-    <label class="consent">
-      <input type="checkbox" id="consent" required>
-      I confirm that the information submitted is correct and may be used for tournament verification.
-    </label>
+      <input type="hidden" id="tid">
 
-    <button class="btn primary" type="submit">SUBMIT REGISTRATION</button>
-  </form>
+      <div class="form-grid">
 
-  <div id="result"></div>
+        <input id="team" placeholder="Team / Squad Name" required>
+
+        <input id="igl" placeholder="IGL In-Game Name" required>
+
+        <input id="uid1" placeholder="IGL UID" required>
+
+        <input
+          id="email"
+          type="email"
+          placeholder="IGL Email Address"
+          required
+        >
+
+        <input
+          id="mobile"
+          type="tel"
+          placeholder="IGL Mobile Number"
+          required
+        >
+
+        <input id="p2" placeholder="Player 2 In-Game Name" required>
+
+        <input id="uid2" placeholder="Player 2 UID" required>
+
+        <input id="p3" placeholder="Player 3 In-Game Name" required>
+
+        <input id="uid3" placeholder="Player 3 UID" required>
+
+        <input id="p4" placeholder="Player 4 In-Game Name" required>
+
+        <input id="uid4" placeholder="Player 4 UID" required>
+
+      </div>
+
+      <label class="consent">
+        <input type="checkbox" id="consent" required>
+        <span>
+          I confirm that the information submitted is correct and may be
+          used for tournament verification.
+        </span>
+      </label>
+
+      <button class="btn primary form-submit" type="submit">
+        SUBMIT REGISTRATION <span>→</span>
+      </button>
+
+    </form>
+
+    <div id="result"></div>
+
+  </div>
+
 </section>
 
-<section id="status">
-  <small>STATUS CHECK</small>
-  <h2>CHECK REGISTRATION.</h2>
 
-  <form id="check">
-    <input id="rid" placeholder="HV-FM-001" required>
-    <button class="btn" type="submit">CHECK STATUS</button>
-  </form>
+<!-- STATUS CHECK -->
 
-  <div id="checkResult"></div>
+<section id="status" class="section status-section">
+
+  <div class="status-shell">
+
+    <div class="status-heading">
+      <div class="big-icon">⌕</div>
+
+      <div>
+        <small>REGISTRATION MANAGEMENT</small>
+        <h2>CHECK YOUR <em>REGISTRATION.</em></h2>
+        <p>
+          View your registration details and status using your
+          Registration ID.
+        </p>
+      </div>
+    </div>
+
+
+    <form id="check" class="check-form">
+
+      <div>
+        <label>REGISTRATION ID</label>
+        <input
+          id="rid"
+          placeholder="HV-FM-001"
+          required
+        >
+      </div>
+
+      <button class="btn primary" type="submit">
+        CHECK REGISTRATION →
+      </button>
+
+    </form>
+
+
+    <div id="checkResult" class="check-result"></div>
+
+  </div>
+
 </section>
-<section id="edit-registration">
-  <small>REGISTRATION MANAGEMENT</small>
-  <h2>EDIT REGISTRATION.</h2>
-  <p>
-    Enter your Registration ID and IGL Mobile Number to access
-    and edit your registration.
-  </p>
 
-  <form id="editVerify">
-    <input
-      id="editRid"
-      type="text"
-      placeholder="Registration ID (e.g. HV-FM-013)"
-      required
-    >
 
-    <input
-      id="editMobile"
-      type="tel"
-      placeholder="IGL Mobile Number"
-      required
-    >
+<!-- EDIT REGISTRATION -->
 
-    <button class="btn" type="submit">VERIFY & EDIT</button>
-  </form>
+<section id="edit-registration" class="section edit-section">
 
-  <div id="editMessage"></div>
+  <div class="status-shell">
 
-  <form id="editForm" style="display:none;">
+    <div class="status-heading">
 
-    <input type="hidden" id="editOriginalRid">
-    <input type="hidden" id="editOriginalMobile">
+      <div class="big-icon edit-icon">✎</div>
 
-    <input
-      id="editTeam"
-      type="text"
-      placeholder="Team / Squad Name"
-      required
-    >
+      <div>
+        <small>PARTICIPANT ACCESS</small>
+        <h2>EDIT YOUR <em>REGISTRATION.</em></h2>
 
-    <input
-      id="editIgl"
-      type="text"
-      placeholder="IGL In-Game Name"
-      required
-    >
+        <p>
+          Enter your Registration ID and IGL Mobile Number to
+          access your squad details.
+        </p>
+      </div>
 
-    <input
-      id="editIglUid"
-      type="text"
-      placeholder="IGL UID"
-      required
-    >
+    </div>
 
-    <input
-      id="editNewMobile"
-      type="tel"
-      placeholder="IGL Mobile Number"
-      required
-    >
 
-    <input
-      id="editP2"
-      type="text"
-      placeholder="Player 2 In-Game Name"
-      required
-    >
+    <form id="editVerify" class="check-form">
 
-    <input
-      id="editUid2"
-      type="text"
-      placeholder="Player 2 UID"
-      required
-    >
+      <div>
+        <label>REGISTRATION ID</label>
+        <input
+          id="editRid"
+          type="text"
+          placeholder="HV-FM-013"
+          required
+        >
+      </div>
 
-    <input
-      id="editP3"
-      type="text"
-      placeholder="Player 3 In-Game Name"
-      required
-    >
+      <div>
+        <label>IGL MOBILE NUMBER</label>
+        <input
+          id="editMobile"
+          type="tel"
+          placeholder="Enter IGL mobile number"
+          required
+        >
+      </div>
 
-    <input
-      id="editUid3"
-      type="text"
-      placeholder="Player 3 UID"
-      required
-    >
+      <button class="btn primary" type="submit">
+        VERIFY & EDIT →
+      </button>
 
-    <input
-      id="editP4"
-      type="text"
-      placeholder="Player 4 In-Game Name"
-      required
-    >
+    </form>
 
-    <input
-      id="editUid4"
-      type="text"
-      placeholder="Player 4 UID"
-      required
-    >
 
-    <div id="editCurrentStatus"></div>
+    <div id="editMessage" class="edit-message"></div>
 
-    <button class="btn primary" type="submit">
-      SAVE CHANGES
-    </button>
-  </form>
 
-  <div id="editResult"></div>
+    <form id="editForm" class="edit-form" style="display:none;">
+
+      <input type="hidden" id="editOriginalRid">
+      <input type="hidden" id="editOriginalMobile">
+
+
+      <div class="form-grid">
+
+        <input
+          id="editTeam"
+          type="text"
+          placeholder="Team / Squad Name"
+          required
+        >
+
+        <input
+          id="editIgl"
+          type="text"
+          placeholder="IGL In-Game Name"
+          required
+        >
+
+        <input
+          id="editIglUid"
+          type="text"
+          placeholder="IGL UID"
+          required
+        >
+
+        <input
+          id="editNewMobile"
+          type="tel"
+          placeholder="IGL Mobile Number"
+          required
+        >
+
+        <input
+          id="editIglEmail"
+          type="email"
+          placeholder="IGL Email Address"
+          required
+        >
+
+        <input
+          id="editP2"
+          type="text"
+          placeholder="Player 2 In-Game Name"
+          required
+        >
+
+        <input
+          id="editUid2"
+          type="text"
+          placeholder="Player 2 UID"
+          required
+        >
+
+        <input
+          id="editP3"
+          type="text"
+          placeholder="Player 3 In-Game Name"
+          required
+        >
+
+        <input
+          id="editUid3"
+          type="text"
+          placeholder="Player 3 UID"
+          required
+        >
+
+        <input
+          id="editP4"
+          type="text"
+          placeholder="Player 4 In-Game Name"
+          required
+        >
+
+        <input
+          id="editUid4"
+          type="text"
+          placeholder="Player 4 UID"
+          required
+        >
+
+      </div>
+
+
+      <div id="editCurrentStatus" class="current-status"></div>
+
+
+      <button class="btn primary form-submit" type="submit">
+        SAVE CHANGES →
+      </button>
+
+    </form>
+
+
+    <div id="editResult" class="edit-result"></div>
+
+  </div>
+
 </section>
-<section id="faq">
-  <small>FAQ</small>
-  <h2>QUICK ANSWERS.</h2>
 
-  <details>
-    <summary>Is registration free?</summary>
-    <p>Yes. HAWKS VERSE tournament registration is free.</p>
-  </details>
 
-  <details>
-    <summary>Are 4 players compulsory?</summary>
-    <p>Yes. Every squad must have 4 players.</p>
-  </details>
+<!-- FAQ -->
 
-  <details>
-    <summary>Who can register?</summary>
-    <p>Any Free Fire MAX player can register.</p>
-  </details>
+<section id="faq" class="section faq-section">
 
-  <details>
-    <summary>What is Registration ID?</summary>
-    <p>It is the unique ID generated after successful registration.</p>
-  </details>
+  <div class="section-heading">
+    <div>
+      <small>FAQ</small>
+      <h2>QUICK <em>ANSWERS.</em></h2>
+    </div>
+  </div>
 
-  <details>
-    <summary>How can I check my status?</summary>
-    <p>Use your Registration ID in the Status Check section.</p>
-  </details>
+
+  <div class="faq-list">
+
+    <details>
+      <summary>
+        Is registration free?
+        <span>+</span>
+      </summary>
+      <p>
+        Yes. HAWKS VERSE tournament registration is completely free.
+      </p>
+    </details>
+
+    <details>
+      <summary>
+        Are 4 players compulsory?
+        <span>+</span>
+      </summary>
+      <p>
+        Yes. Every squad must have exactly 4 players.
+      </p>
+    </details>
+
+    <details>
+      <summary>
+        Who can register?
+        <span>+</span>
+      </summary>
+      <p>
+        Any Free Fire MAX player can register.
+      </p>
+    </details>
+
+    <details>
+      <summary>
+        What is Registration ID?
+        <span>+</span>
+      </summary>
+      <p>
+        It is the unique ID generated after successful registration.
+      </p>
+    </details>
+
+    <details>
+      <summary>
+        How can I check my status?
+        <span>+</span>
+      </summary>
+      <p>
+        Enter your Registration ID in the Registration Management section.
+      </p>
+    </details>
+
+  </div>
+
+</section>
+
+
+<!-- BOTTOM CTA -->
+
+<section class="community-cta">
+
+  <div>
+    <small>HAWKS VERSE COMMUNITY</small>
+    <h2>MORE THAN JUST A <em>GAME.</em></h2>
+    <p>
+      Join the community and stay updated about upcoming tournaments.
+    </p>
+  </div>
+
+  <a
+    class="btn primary"
+    href="https://whatsapp.com/channel/0029Vb2yCJL7T8bbrrUey840"
+    target="_blank"
+    rel="noopener"
+  >
+    JOIN HAWKS VERSE →
+  </a>
+
 </section>
 
 </main>
 
-<footer>
-  <b>HAWKS <i>VERSE</i></b>
-  <span>PLAY. COMPETE. RISE.</span>
 
-  <a href="https://whatsapp.com/channel/0029Vb2yCJL7T8bbrrUey840" target="_blank">
+<footer>
+
+  <div class="footer-brand">
+    <b>⚡ HAWKS <i>VERSE</i></b>
+    <span>PLAY • COMPETE • RISE.</span>
+  </div>
+
+  <div class="footer-links">
+    <a href="#tournaments">Tournaments</a>
+    <a href="#register">Register</a>
+    <a href="#status">Check Registration</a>
+    <a href="#faq">FAQ</a>
+  </div>
+
+  <a
+    class="footer-whatsapp"
+    href="https://whatsapp.com/channel/0029Vb2yCJL7T8bbrrUey840"
+    target="_blank"
+    rel="noopener"
+  >
     WhatsApp Community
   </a>
 
-  <span>© HAWKS VERSE</span>
+  <span class="copyright">
+    © 2026 HAWKS VERSE. ALL RIGHTS RESERVED.
+  </span>
+
 </footer>
+
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
