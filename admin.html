@@ -133,6 +133,33 @@ input[type=file]{padding:10px}input[type=checkbox]{width:17px;height:17px;accent
       .group-form-grid .full{grid-column:auto}
     }
 
+    .group-toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:15px}
+    .group-toolbar button{min-width:180px}
+    .group-card{
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:15px;
+      padding:16px;
+      margin-top:12px;
+      background:linear-gradient(145deg,#101620,#080b11);
+    }
+    .group-card-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+    .group-card-title{font:900 18px Orbitron,sans-serif}
+    .group-capacity{font-weight:900;color:#ffd968}
+    .group-capacity.full{color:#ff929b}
+    .group-card-meta{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+    .group-team{
+      display:flex;justify-content:space-between;gap:10px;align-items:center;
+      padding:10px 0;border-top:1px solid rgba(255,255,255,.06);
+    }
+    .group-team:first-child{border-top:0}
+    .group-team-main{min-width:0}
+    .group-team-name{font-weight:800}
+    .group-team-sub{font-size:11px;color:#8f99aa;margin-top:3px}
+    .group-link{
+      display:inline-block;margin-top:10px;color:#ffd968;text-decoration:none;font-weight:800;font-size:12px;
+    }
+    .group-link:hover{text-decoration:underline}
+
 </style>
 </head>
 
@@ -375,6 +402,11 @@ input[type=file]{padding:10px}input[type=checkbox]{width:17px;height:17px;accent
 
     <div id="groupList" class="group-list-box">
       <div class="muted">Select a tournament to view groups.</div>
+    </div>
+
+    <div class="group-toolbar">
+      <button id="autoAssignGroupsBtn" class="primary">AUTO ASSIGN CONFIRMED TEAMS</button>
+      <button id="refreshGroupsBtn" class="secondary">REFRESH GROUPS</button>
     </div>
 
   </div>
@@ -1432,11 +1464,13 @@ document.getElementById("cancelTournamentBtn")
 document.getElementById("saveTournamentBtn")
   .addEventListener("click", saveTournament);
 
-function fillGroupTournamentSelect() {
-  const select =
-    document.getElementById("groupTournament");
+let editingGroupId = null;
 
+function fillGroupTournamentSelect() {
+  const select = document.getElementById("groupTournament");
   if (!select) return;
+
+  const current = select.value;
 
   select.innerHTML =
     '<option value="">Select tournament</option>' +
@@ -1446,7 +1480,403 @@ function fillGroupTournamentSelect() {
         ${t.season ? " " + escapeHtml(t.season) : ""}
       </option>
     `).join("");
+
+  if (current && tournaments.some(t => t.id === current)) {
+    select.value = current;
+  }
 }
+
+function resetGroupForm() {
+  editingGroupId = null;
+  document.getElementById("groupName").value = "";
+  document.getElementById("groupNumber").value = "1";
+  document.getElementById("groupSlots").value = "12";
+  document.getElementById("groupWhatsapp").value = "";
+  document.getElementById("groupInstructions").value = "";
+  document.getElementById("groupPublished").checked = false;
+  document.getElementById("saveGroupBtn").textContent = "SAVE GROUP";
+}
+
+async function loadGroupsForTournament(tournamentId) {
+  const list = document.getElementById("groupList");
+  if (!list) return;
+
+  if (!tournamentId) {
+    list.innerHTML = '<div class="muted">Select a tournament to view groups.</div>';
+    resetGroupForm();
+    return;
+  }
+
+  list.innerHTML = '<div class="empty">Loading groups...</div>';
+
+  const { data: groups, error: groupError } = await client
+    .from("tournament_groups")
+    .select(`
+      id,
+      tournament_id,
+      group_name,
+      group_number,
+      max_slots,
+      whatsapp_link,
+      instructions,
+      is_published,
+      created_at,
+      updated_at
+    `)
+    .eq("tournament_id", tournamentId)
+    .order("group_number", { ascending: true });
+
+  if (groupError) {
+    console.error("Group load error:", groupError);
+    list.innerHTML = `
+      <div class="empty">
+        Failed to load groups.<br>
+        <span class="muted">${escapeHtml(groupError.message)}</span>
+      </div>
+    `;
+    return;
+  }
+
+  if (!groups || !groups.length) {
+    list.innerHTML = `
+      <div class="empty">
+        No groups created yet.<br>
+        Create Group A, B, C, D etc. using the form above.
+      </div>
+    `;
+    return;
+  }
+
+  const groupIds = groups.map(g => g.id);
+
+  const { data: assignments, error: assignmentError } = await client
+    .from("tournament_group_assignments")
+    .select("id, group_id, registration_id, assigned_at")
+    .in("group_id", groupIds);
+
+  if (assignmentError) {
+    console.error("Assignment load error:", assignmentError);
+    list.innerHTML = `
+      <div class="empty">
+        Groups loaded, but assignments could not be loaded.<br>
+        <span class="muted">${escapeHtml(assignmentError.message)}</span>
+      </div>
+    `;
+    return;
+  }
+
+  const registrationIds = [...new Set((assignments || []).map(a => a.registration_id).filter(Boolean))];
+  let registrationMap = {};
+
+  if (registrationIds.length) {
+    const { data: regs, error: regError } = await client
+      .from("registrations")
+      .select("id, registration_id, team_name, igl_name, igl_email, status")
+      .in("id", registrationIds);
+
+    if (regError) {
+      console.error("Assigned registration load error:", regError);
+    } else {
+      registrationMap = Object.fromEntries((regs || []).map(r => [r.id, r]));
+    }
+  }
+
+  list.innerHTML = groups.map(group => {
+    const assigned = (assignments || [])
+      .filter(a => a.group_id === group.id)
+      .map(a => registrationMap[a.registration_id])
+      .filter(Boolean);
+
+    const capacity = Number(group.max_slots || 0);
+    const count = assigned.length;
+    const isFull = capacity > 0 && count >= capacity;
+
+    const teamsHtml = assigned.length
+      ? assigned.map(r => `
+          <div class="group-team">
+            <div class="group-team-main">
+              <div class="group-team-name">${escapeHtml(r.team_name || "Unnamed Team")}</div>
+              <div class="group-team-sub">
+                ${escapeHtml(r.registration_id || "—")} • IGL: ${escapeHtml(r.igl_name || "—")}
+              </div>
+            </div>
+            <span class="status">${escapeHtml(r.status || "confirmed")}</span>
+          </div>
+        `).join("")
+      : '<div class="muted" style="padding:12px 0;">No teams assigned yet.</div>';
+
+    const whatsappHtml = group.whatsapp_link
+      ? `<a class="group-link" href="${escapeHtml(group.whatsapp_link)}" target="_blank" rel="noopener">OPEN WHATSAPP GROUP ↗</a>`
+      : '<div class="muted" style="margin-top:10px;font-size:12px;">No WhatsApp link added.</div>';
+
+    return `
+      <div class="group-card">
+        <div class="group-card-head">
+          <div>
+            <div class="group-kicker">GROUP ${escapeHtml(group.group_number)}</div>
+            <div class="group-card-title">${escapeHtml(group.group_name)}</div>
+          </div>
+          <div class="group-capacity ${isFull ? "full" : ""}">
+            ${count}/${capacity} SLOTS
+          </div>
+        </div>
+
+        <div class="group-card-meta">
+          <span class="tournament-chip ${group.is_published ? "green" : "red"}">
+            ${group.is_published ? "PUBLISHED" : "UNPUBLISHED"}
+          </span>
+          <span class="tournament-chip">${count} ASSIGNED</span>
+          <span class="tournament-chip">${Math.max(capacity - count, 0)} AVAILABLE</span>
+        </div>
+
+        <div style="font-size:12px;color:#9aa4b4;line-height:1.5;">
+          ${escapeHtml(group.instructions || "No instructions added.")}
+        </div>
+
+        ${whatsappHtml}
+
+        <div style="margin-top:14px;">
+          <div class="detail-label">ASSIGNED TEAMS</div>
+          ${teamsHtml}
+        </div>
+
+        <div class="actions" style="margin-top:14px;">
+          <button class="secondary" onclick="editGroup('${group.id}')">EDIT</button>
+          <button class="danger" onclick="deleteGroup('${group.id}')">DELETE</button>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+window.editGroup = async function(id) {
+  const { data: group, error } = await client
+    .from("tournament_groups")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  if (error || !group) {
+    alert("Could not load group: " + (error?.message || "Group not found"));
+    return;
+  }
+
+  editingGroupId = id;
+  document.getElementById("groupTournament").value = group.tournament_id;
+  document.getElementById("groupName").value = group.group_name || "";
+  document.getElementById("groupNumber").value = group.group_number || 1;
+  document.getElementById("groupSlots").value = group.max_slots || 12;
+  document.getElementById("groupWhatsapp").value = group.whatsapp_link || "";
+  document.getElementById("groupInstructions").value = group.instructions || "";
+  document.getElementById("groupPublished").checked = !!group.is_published;
+  document.getElementById("saveGroupBtn").textContent = "UPDATE GROUP";
+
+  document.getElementById("groupName").scrollIntoView({
+    behavior: "smooth",
+    block: "center"
+  });
+};
+
+window.deleteGroup = async function(id) {
+  const { count, error: countError } = await client
+    .from("tournament_group_assignments")
+    .select("*", { count: "exact", head: true })
+    .eq("group_id", id);
+
+  if (countError) {
+    alert("Could not check group assignments: " + countError.message);
+    return;
+  }
+
+  if ((count || 0) > 0) {
+    alert("This group has assigned teams. Move/remove the assignments before deleting the group.");
+    return;
+  }
+
+  if (!confirm("Delete this empty group?")) return;
+
+  const { error } = await client
+    .from("tournament_groups")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    alert("Delete failed: " + error.message);
+    return;
+  }
+
+  showToast("Group deleted.");
+  await loadGroupsForTournament(document.getElementById("groupTournament").value);
+};
+
+async function saveGroup() {
+  const tournamentId = document.getElementById("groupTournament").value;
+  const groupName = document.getElementById("groupName").value.trim();
+  const groupNumber = Number(document.getElementById("groupNumber").value || 0);
+  const maxSlots = Number(document.getElementById("groupSlots").value || 0);
+  const whatsappLink = document.getElementById("groupWhatsapp").value.trim();
+  const instructions = document.getElementById("groupInstructions").value.trim();
+  const isPublished = document.getElementById("groupPublished").checked;
+
+  if (!tournamentId) {
+    alert("Please select a tournament.");
+    return;
+  }
+
+  if (!groupName || groupNumber < 1 || maxSlots < 1) {
+    alert("Please enter Group Name, valid Group Number and Max Slots.");
+    return;
+  }
+
+  const payload = {
+    tournament_id: tournamentId,
+    group_name: groupName,
+    group_number: groupNumber,
+    max_slots: maxSlots,
+    whatsapp_link: whatsappLink || null,
+    instructions: instructions || null,
+    is_published: isPublished,
+    updated_at: new Date().toISOString()
+  };
+
+  const button = document.getElementById("saveGroupBtn");
+  const oldText = button.textContent;
+  button.disabled = true;
+  button.textContent = editingGroupId ? "UPDATING..." : "SAVING...";
+
+  let result;
+
+  if (editingGroupId) {
+    result = await client
+      .from("tournament_groups")
+      .update(payload)
+      .eq("id", editingGroupId);
+  } else {
+    result = await client
+      .from("tournament_groups")
+      .insert(payload);
+  }
+
+  button.disabled = false;
+  button.textContent = oldText;
+
+  if (result.error) {
+    console.error("Group save error:", result.error);
+    alert("Group save failed: " + result.error.message);
+    return;
+  }
+
+  showToast(editingGroupId ? "Group updated successfully." : "Group created successfully.");
+  editingGroupId = null;
+  resetGroupForm();
+  await loadGroupsForTournament(tournamentId);
+}
+
+async function autoAssignConfirmedTeams() {
+  const tournamentId = document.getElementById("groupTournament").value;
+
+  if (!tournamentId) {
+    alert("Please select a tournament first.");
+    return;
+  }
+
+  const { data: groups, error: groupError } = await client
+    .from("tournament_groups")
+    .select("id, group_name, max_slots")
+    .eq("tournament_id", tournamentId)
+    .order("group_number", { ascending: true });
+
+  if (groupError) {
+    alert("Could not load groups: " + groupError.message);
+    return;
+  }
+
+  if (!groups || !groups.length) {
+    alert("Create groups first (for example Group A, B, C and D).");
+    return;
+  }
+
+  const { data: confirmed, error: regError } = await client
+    .from("registrations")
+    .select("id, registration_id, team_name, igl_name")
+    .eq("tournament_id", tournamentId)
+    .eq("status", "confirmed")
+    .order("created_at", { ascending: true });
+
+  if (regError) {
+    alert("Could not load confirmed registrations: " + regError.message);
+    return;
+  }
+
+  const { data: existingAssignments, error: assignmentError } = await client
+    .from("tournament_group_assignments")
+    .select("registration_id")
+    .in("group_id", groups.map(g => g.id));
+
+  if (assignmentError) {
+    alert("Could not load existing assignments: " + assignmentError.message);
+    return;
+  }
+
+  const assignedIds = new Set((existingAssignments || []).map(x => x.registration_id));
+  const pending = (confirmed || []).filter(r => !assignedIds.has(r.id));
+
+  if (!pending.length) {
+    showToast("All confirmed teams are already assigned.");
+    await loadGroupsForTournament(tournamentId);
+    return;
+  }
+
+  const button = document.getElementById("autoAssignGroupsBtn");
+  button.disabled = true;
+  button.textContent = "ASSIGNING...";
+
+  let assignedCount = 0;
+  let failedCount = 0;
+
+  for (const registration of pending) {
+    const { data, error } = await client.rpc(
+      "assign_registration_to_group",
+      { p_registration_id: registration.id }
+    );
+
+    if (error || !data) {
+      failedCount++;
+      console.error("Assignment failed", registration, error);
+    } else {
+      assignedCount++;
+    }
+  }
+
+  button.disabled = false;
+  button.textContent = "AUTO ASSIGN CONFIRMED TEAMS";
+
+  await loadGroupsForTournament(tournamentId);
+
+  if (failedCount) {
+    alert(
+      `Assignment complete.\n\nAssigned: ${assignedCount}\nNot assigned: ${failedCount}\n\n` +
+      `Unassigned teams may be due to all group slots being full.`
+    );
+  } else {
+    showToast(`${assignedCount} confirmed team(s) assigned successfully.`);
+  }
+}
+
+document.getElementById("groupTournament").addEventListener("change", e => {
+  loadGroupsForTournament(e.target.value);
+});
+
+document.getElementById("saveGroupBtn").addEventListener("click", saveGroup);
+
+document.getElementById("autoAssignGroupsBtn").addEventListener(
+  "click",
+  autoAssignConfirmedTeams
+);
+
+document.getElementById("refreshGroupsBtn").addEventListener("click", () => {
+  loadGroupsForTournament(document.getElementById("groupTournament").value);
+});
 
 // Make tournament loading happen whenever admin panel opens.
 const oldShowAdmin = showAdmin;
