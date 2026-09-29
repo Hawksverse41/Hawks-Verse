@@ -37,7 +37,10 @@ async function boot() {
 
     // Homepage
     if ($("heroPoster")) $("heroPoster").src = poster;
-    if ($("tournamentPoster")) $("tournamentPoster").src = poster;
+
+    if ($("tournamentPoster")) {
+      $("tournamentPoster").src = poster;
+    }
 
     if ($("heroName")) {
       $("heroName").textContent = t.name;
@@ -106,18 +109,42 @@ if (registrationForm) {
 
     const p = {
       p_tournament_id: t.id,
-      p_team_name: $("team").value.trim(),
-      p_team_logo_url: "",
-      p_igl_name: $("igl").value.trim(),
-      p_igl_uid: $("uid1").value.trim(),
-      p_igl_mobile: $("mobile").value.trim(),
-      p_igl_email: $("email").value.trim(),
-      p_player2_name: $("p2").value.trim(),
-      p_player2_uid: $("uid2").value.trim(),
-      p_player3_name: $("p3").value.trim(),
-      p_player3_uid: $("uid3").value.trim(),
-      p_player4_name: $("p4").value.trim(),
-      p_player4_uid: $("uid4").value.trim()
+
+      p_team_name:
+        $("team").value.trim(),
+
+      p_team_logo_url:
+        "",
+
+      p_igl_name:
+        $("igl").value.trim(),
+
+      p_igl_uid:
+        $("uid1").value.trim(),
+
+      p_igl_mobile:
+        $("mobile").value.trim(),
+
+      p_igl_email:
+        $("email").value.trim(),
+
+      p_player2_name:
+        $("p2").value.trim(),
+
+      p_player2_uid:
+        $("uid2").value.trim(),
+
+      p_player3_name:
+        $("p3").value.trim(),
+
+      p_player3_uid:
+        $("uid3").value.trim(),
+
+      p_player4_name:
+        $("p4").value.trim(),
+
+      p_player4_uid:
+        $("uid4").value.trim()
     };
 
     const r = await db.rpc(
@@ -177,6 +204,11 @@ if (checkForm) {
       return;
     }
 
+    if ($("checkResult")) {
+      $("checkResult").innerHTML =
+        "Checking registration...";
+    }
+
     const r = await db.rpc(
       "check_registration",
       {
@@ -185,10 +217,16 @@ if (checkForm) {
     );
 
     if (r.error) {
+      console.error(
+        "Check registration:",
+        r.error
+      );
+
       if ($("checkResult")) {
         $("checkResult").textContent =
           "Registration not found.";
       }
+
       return;
     }
 
@@ -196,91 +234,372 @@ if (checkForm) {
       ? r.data[0]
       : r.data;
 
+    if (!x) {
+      if ($("checkResult")) {
+        $("checkResult").textContent =
+          "Registration not found.";
+      }
+
+      return;
+    }
+
+    const status = String(
+      x.status || ""
+    )
+      .replaceAll("_", " ")
+      .replace(/\b\w/g, c => c.toUpperCase());
+
+    let groupHtml = "";
+
+    // ===============================
+    // ASSIGNED GROUP
+    // ===============================
+
+    if (x.group_name) {
+
+      groupHtml = `
+        <div class="registration-group">
+
+          <div class="group-label">
+            YOUR ASSIGNED GROUP
+          </div>
+
+          <div class="group-name">
+            ${escapeHtml(x.group_name)}
+          </div>
+
+          ${
+            x.group_number
+              ? `
+                <div class="group-number">
+                  GROUP ${escapeHtml(
+                    String(x.group_number)
+                  )}
+                </div>
+              `
+              : ""
+          }
+
+          ${
+            x.group_instructions
+              ? `
+                <p class="group-instructions">
+                  ${escapeHtml(
+                    x.group_instructions
+                  )}
+                </p>
+              `
+              : ""
+          }
+
+          ${
+            x.whatsapp_link
+              ? `
+                <a
+                  class="btn primary"
+                  href="${safeUrl(
+                    x.whatsapp_link
+                  )}"
+                  target="_blank"
+                  rel="noopener"
+                >
+                  JOIN YOUR WHATSAPP GROUP →
+                </a>
+              `
+              : `
+                <div class="group-pending">
+                  WhatsApp group link will be added
+                  by HAWKS VERSE.
+                </div>
+              `
+          }
+
+        </div>
+      `;
+
+    } else {
+
+      groupHtml = `
+        <div class="registration-group pending">
+
+          <div class="group-label">
+            GROUP ASSIGNMENT
+          </div>
+
+          <div class="group-pending">
+            Your group has not been published yet.
+            Please check again later.
+          </div>
+
+        </div>
+      `;
+    }
+
+
+    // ===============================
+    // FINAL RESULT
+    // ===============================
+
     if ($("checkResult")) {
-      $("checkResult").innerHTML = x
-        ? "Team: <b>" + x.team_name + "</b><br>" +
-          "Status: <b>" + x.status + "</b><br>" +
-          "Registration ID: <b>" +
-          x.registration_id +
-          "</b>"
-        : "Registration not found.";
+
+      $("checkResult").innerHTML =
+        "Team: <b>" +
+        escapeHtml(
+          x.team_name || ""
+        ) +
+        "</b><br>" +
+
+        "Status: <b>" +
+        escapeHtml(status) +
+        "</b><br>" +
+
+        "Registration ID: <b>" +
+        escapeHtml(
+          x.registration_id ||
+          registrationId
+        ) +
+        "</b>" +
+
+        groupHtml;
     }
   };
 }
+
+
+// =========================================================
+// SAFE HTML HELPERS
+// =========================================================
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(
+      /&/g,
+      "&amp;"
+    )
+    .replace(
+      /</g,
+      "&lt;"
+    )
+    .replace(
+      />/g,
+      "&gt;"
+    )
+    .replace(
+      /"/g,
+      "&quot;"
+    )
+    .replace(
+      /'/g,
+      "&#039;"
+    );
+}
+
+
+function safeUrl(value) {
+
+  const url =
+    String(value ?? "").trim();
+
+  try {
+
+    const parsed =
+      new URL(url);
+
+    if (
+      parsed.protocol === "https:" &&
+      (
+        parsed.hostname === "chat.whatsapp.com" ||
+        parsed.hostname === "whatsapp.com"
+      )
+    ) {
+      return parsed.href;
+    }
+
+  } catch (_) {}
+
+  return "#";
+}
+
 
 // =========================================================
 // PARTICIPANT EDIT REGISTRATION
 // Verification: Registration ID + IGL Mobile
 // =========================================================
 
-const editVerifyForm = document.getElementById("editVerify");
-const editForm = document.getElementById("editForm");
+const editVerifyForm =
+  document.getElementById("editVerify");
+
+const editForm =
+  document.getElementById("editForm");
+
 
 if (editVerifyForm) {
-  editVerifyForm.addEventListener("submit", async function (e) {
-    e.preventDefault();
 
-    const rid = document.getElementById("editRid").value.trim();
-    const mobile = document.getElementById("editMobile").value.trim();
+  editVerifyForm.addEventListener(
+    "submit",
+    async function (e) {
 
-    const message = document.getElementById("editMessage");
+      e.preventDefault();
 
-    if (!rid || !mobile) {
-      message.textContent = "Please enter Registration ID and IGL Mobile Number.";
-      return;
-    }
+      const rid =
+        document
+          .getElementById("editRid")
+          .value
+          .trim();
 
-    message.textContent = "Verifying registration...";
+      const mobile =
+        document
+          .getElementById("editMobile")
+          .value
+          .trim();
 
-    const { data, error } = await db.rpc(
-      "get_registration_for_edit",
-      {
-        p_registration_id: rid,
-        p_igl_mobile: mobile
+      const message =
+        document.getElementById(
+          "editMessage"
+        );
+
+
+      if (!rid || !mobile) {
+
+        message.textContent =
+          "Please enter Registration ID and IGL Mobile Number.";
+
+        return;
       }
-    );
 
-    if (error) {
-      console.error(error);
-      message.textContent = "Verification failed. Please try again.";
-      return;
-    }
 
-    const r = Array.isArray(data) ? data[0] : data;
-
-    if (!r) {
       message.textContent =
-        "Registration ID or IGL Mobile Number is incorrect.";
-      return;
+        "Verifying registration...";
+
+
+      const { data, error } =
+        await db.rpc(
+          "get_registration_for_edit",
+          {
+            p_registration_id: rid,
+            p_igl_mobile: mobile
+          }
+        );
+
+
+      if (error) {
+
+        console.error(error);
+
+        message.textContent =
+          "Verification failed. Please try again.";
+
+        return;
+      }
+
+
+      const r =
+        Array.isArray(data)
+          ? data[0]
+          : data;
+
+
+      if (!r) {
+
+        message.textContent =
+          "Registration ID or IGL Mobile Number is incorrect.";
+
+        return;
+      }
+
+
+      // Store verification details
+
+      document.getElementById(
+        "editOriginalRid"
+      ).value =
+        r.registration_id;
+
+
+      document.getElementById(
+        "editOriginalMobile"
+      ).value =
+        mobile;
+
+
+      // Load registration details
+
+      document.getElementById(
+        "editTeam"
+      ).value =
+        r.team_name || "";
+
+
+      document.getElementById(
+        "editIgl"
+      ).value =
+        r.igl_name || "";
+
+
+      document.getElementById(
+        "editIglUid"
+      ).value =
+        r.igl_uid || "";
+
+
+      document.getElementById(
+        "editNewMobile"
+      ).value =
+        r.igl_mobile || "";
+
+
+      document.getElementById(
+        "editP2"
+      ).value =
+        r.player2_name || "";
+
+
+      document.getElementById(
+        "editUid2"
+      ).value =
+        r.player2_uid || "";
+
+
+      document.getElementById(
+        "editP3"
+      ).value =
+        r.player3_name || "";
+
+
+      document.getElementById(
+        "editUid3"
+      ).value =
+        r.player3_uid || "";
+
+
+      document.getElementById(
+        "editP4"
+      ).value =
+        r.player4_name || "";
+
+
+      document.getElementById(
+        "editUid4"
+      ).value =
+        r.player4_uid || "";
+
+
+      document.getElementById(
+        "editCurrentStatus"
+      ).innerHTML =
+        "Current Status: <b>" +
+        (r.status || "") +
+        "</b>";
+
+
+      message.textContent =
+        "✓ Verification successful. You can edit your details below.";
+
+
+      editForm.style.display =
+        "block";
     }
-
-    // Store verification details
-    document.getElementById("editOriginalRid").value = r.registration_id;
-    document.getElementById("editOriginalMobile").value = mobile;
-
-    // Load registration details
-    document.getElementById("editTeam").value = r.team_name || "";
-    document.getElementById("editIgl").value = r.igl_name || "";
-    document.getElementById("editIglUid").value = r.igl_uid || "";
-    document.getElementById("editNewMobile").value = r.igl_mobile || "";
-
-    document.getElementById("editP2").value = r.player2_name || "";
-    document.getElementById("editUid2").value = r.player2_uid || "";
-
-    document.getElementById("editP3").value = r.player3_name || "";
-    document.getElementById("editUid3").value = r.player3_uid || "";
-
-    document.getElementById("editP4").value = r.player4_name || "";
-    document.getElementById("editUid4").value = r.player4_uid || "";
-
-    document.getElementById("editCurrentStatus").innerHTML =
-      "Current Status: <b>" + (r.status || "") + "</b>";
-
-    message.textContent =
-      "✓ Verification successful. You can edit your details below.";
-
-    editForm.style.display = "block";
-  });
+  );
 }
 
 
@@ -289,111 +608,226 @@ if (editVerifyForm) {
 // =========================================================
 
 if (editForm) {
-  editForm.addEventListener("submit", async function (e) {
-    e.preventDefault();
 
-    const result = document.getElementById("editResult");
+  editForm.addEventListener(
+    "submit",
+    async function (e) {
 
-    const rid =
-      document.getElementById("editOriginalRid").value.trim();
+      e.preventDefault();
 
-    const originalMobile =
-      document.getElementById("editOriginalMobile").value.trim();
+      const result =
+        document.getElementById(
+          "editResult"
+        );
 
-    const team =
-      document.getElementById("editTeam").value.trim();
 
-    const igl =
-      document.getElementById("editIgl").value.trim();
+      const rid =
+        document
+          .getElementById(
+            "editOriginalRid"
+          )
+          .value
+          .trim();
 
-    const iglUid =
-      document.getElementById("editIglUid").value.trim();
 
-    const newMobile =
-      document.getElementById("editNewMobile").value.trim();
+      const originalMobile =
+        document
+          .getElementById(
+            "editOriginalMobile"
+          )
+          .value
+          .trim();
 
-    const p2 =
-      document.getElementById("editP2").value.trim();
 
-    const uid2 =
-      document.getElementById("editUid2").value.trim();
+      const team =
+        document
+          .getElementById(
+            "editTeam"
+          )
+          .value
+          .trim();
 
-    const p3 =
-      document.getElementById("editP3").value.trim();
 
-    const uid3 =
-      document.getElementById("editUid3").value.trim();
+      const igl =
+        document
+          .getElementById(
+            "editIgl"
+          )
+          .value
+          .trim();
 
-    const p4 =
-      document.getElementById("editP4").value.trim();
 
-    const uid4 =
-      document.getElementById("editUid4").value.trim();
+      const iglUid =
+        document
+          .getElementById(
+            "editIglUid"
+          )
+          .value
+          .trim();
 
-    if (
-      !rid ||
-      !originalMobile ||
-      !team ||
-      !igl ||
-      !iglUid ||
-      !newMobile ||
-      !p2 ||
-      !uid2 ||
-      !p3 ||
-      !uid3 ||
-      !p4 ||
-      !uid4
-    ) {
-      result.textContent = "Please fill all fields.";
-      return;
-    }
 
-    result.textContent = "Saving changes...";
+      const newMobile =
+        document
+          .getElementById(
+            "editNewMobile"
+          )
+          .value
+          .trim();
 
-    const { data, error } = await db.rpc(
-      "update_registration_by_verification",
-      {
-        p_registration_id: rid,
-        p_igl_mobile: originalMobile,
-        p_team_name: team,
-        p_igl_name: igl,
-        p_igl_uid: iglUid,
-        p_new_igl_mobile: newMobile,
-        p_player2_name: p2,
-        p_player2_uid: uid2,
-        p_player3_name: p3,
-        p_player3_uid: uid3,
-        p_player4_name: p4,
-        p_player4_uid: uid4
+
+      const p2 =
+        document
+          .getElementById(
+            "editP2"
+          )
+          .value
+          .trim();
+
+
+      const uid2 =
+        document
+          .getElementById(
+            "editUid2"
+          )
+          .value
+          .trim();
+
+
+      const p3 =
+        document
+          .getElementById(
+            "editP3"
+          )
+          .value
+          .trim();
+
+
+      const uid3 =
+        document
+          .getElementById(
+            "editUid3"
+          )
+          .value
+          .trim();
+
+
+      const p4 =
+        document
+          .getElementById(
+            "editP4"
+          )
+          .value
+          .trim();
+
+
+      const uid4 =
+        document
+          .getElementById(
+            "editUid4"
+          )
+          .value
+          .trim();
+
+
+      if (
+        !rid ||
+        !originalMobile ||
+        !team ||
+        !igl ||
+        !iglUid ||
+        !newMobile ||
+        !p2 ||
+        !uid2 ||
+        !p3 ||
+        !uid3 ||
+        !p4 ||
+        !uid4
+      ) {
+
+        result.textContent =
+          "Please fill all fields.";
+
+        return;
       }
-    );
 
-    if (error) {
-      console.error(error);
 
       result.textContent =
-        error.message ||
-        "Unable to save changes. Please check your details.";
-      return;
+        "Saving changes...";
+
+
+      const { data, error } =
+        await db.rpc(
+          "update_registration_by_verification",
+          {
+            p_registration_id: rid,
+            p_igl_mobile: originalMobile,
+            p_team_name: team,
+            p_igl_name: igl,
+            p_igl_uid: iglUid,
+            p_new_igl_mobile: newMobile,
+            p_player2_name: p2,
+            p_player2_uid: uid2,
+            p_player3_name: p3,
+            p_player3_uid: uid3,
+            p_player4_name: p4,
+            p_player4_uid: uid4
+          }
+        );
+
+
+      if (error) {
+
+        console.error(error);
+
+        result.textContent =
+          error.message ||
+          "Unable to save changes. Please check your details.";
+
+        return;
+      }
+
+
+      const updated =
+        Array.isArray(data)
+          ? data[0]
+          : data;
+
+
+      result.innerHTML =
+        "<b>✓ Registration updated successfully.</b><br>" +
+        "Registration ID: <b>" +
+        rid +
+        "</b><br>" +
+        "Status remains: <b>" +
+        (
+          updated &&
+          updated.status
+            ? updated.status
+            : "unchanged"
+        ) +
+        "</b><br><br>" +
+        "Your changes have been saved. HAWKS VERSE will review the updated details.";
+
+
+      document.getElementById(
+        "editCurrentStatus"
+      ).innerHTML =
+        "Current Status: <b>" +
+        (
+          updated &&
+          updated.status
+            ? updated.status
+            : ""
+        ) +
+        "</b>";
+
     }
-
-    const updated = Array.isArray(data) ? data[0] : data;
-
-    result.innerHTML =
-      "<b>✓ Registration updated successfully.</b><br>" +
-      "Registration ID: <b>" +
-      rid +
-      "</b><br>" +
-      "Status remains: <b>" +
-      (updated && updated.status ? updated.status : "unchanged") +
-      "<br><br>" +
-      "Your changes have been saved. HAWKS VERSE will review the updated details.";
-
-    document.getElementById("editCurrentStatus").innerHTML =
-      "Current Status: <b>" +
-      (updated && updated.status ? updated.status : "") +
-      "</b>";
-  });
+  );
 }
-// Start
+
+
+// =========================================================
+// START
+// =========================================================
+
 boot();
