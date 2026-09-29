@@ -1520,8 +1520,7 @@ async function loadGroupsForTournament(tournamentId) {
       whatsapp_link,
       instructions,
       is_published,
-      created_at,
-      updated_at
+      created_at
     `)
     .eq("tournament_id", tournamentId)
     .order("group_number", { ascending: true });
