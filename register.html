@@ -3,83 +3,936 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Register | HAWKS VERSE</title>
+
+<title>HAWKS VERSE | Free Fire MAX Esports</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+
 <link rel="stylesheet" href="styles.css">
+
+<style>
+/* HAWKS VERSE SOCIAL LINKS */
+.social-section{
+  width:92%;
+  margin:75px auto 0;
+  padding:34px 28px;
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:22px;
+  background:linear-gradient(145deg,rgba(15,20,30,.94),rgba(7,10,16,.98));
+  box-shadow:0 18px 50px rgba(0,0,0,.18);
+}
+
+.social-heading{
+  text-align:center;
+  margin-bottom:24px;
+}
+
+.social-heading small{
+  display:block;
+  margin-bottom:8px;
+  color:#9aa4b5;
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:2px;
+  text-transform:uppercase;
+}
+
+.social-heading h2{
+  margin:0;
+  font-family:Orbitron,Arial,sans-serif;
+  font-size:clamp(24px,4vw,34px);
+  font-weight:900;
+  letter-spacing:.5px;
+}
+
+.social-heading h2 em{
+  color:#ff3b5c;
+  font-style:normal;
+}
+
+.social-heading p{
+  margin:10px auto 0;
+  max-width:600px;
+  color:#9aa4b5;
+  font-size:14px;
+  line-height:1.65;
+}
+
+.social-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:14px;
+  max-width:900px;
+  margin:0 auto;
+}
+
+.social-card{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  min-height:76px;
+  padding:16px 18px;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:16px;
+  background:#0b1018;
+  color:#eef2f7;
+  text-decoration:none;
+  transition:transform .2s ease,border-color .2s ease,background .2s ease;
+}
+
+.social-card:hover{
+  transform:translateY(-3px);
+  border-color:rgba(255,59,92,.42);
+  background:#101620;
+}
+
+.social-icon{
+  width:42px;
+  height:42px;
+  flex:0 0 42px;
+  display:grid;
+  place-items:center;
+  border-radius:12px;
+  background:#151c27;
+  border:1px solid rgba(255,255,255,.08);
+}
+
+.social-icon svg{
+  width:22px;
+  height:22px;
+  display:block;
+  fill:currentColor;
+}
+
+.social-copy{
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+}
+
+.social-copy strong{
+  font-size:14px;
+  font-weight:900;
+  letter-spacing:.3px;
+}
+
+.social-copy span{
+  color:#8f99aa;
+  font-size:11px;
+  letter-spacing:1px;
+  text-transform:uppercase;
+}
+
+.social-arrow{
+  margin-left:auto;
+  color:#8f99aa;
+  font-size:18px;
+}
+
+@media(max-width:760px){
+  .social-section{
+    padding:28px 18px;
+  }
+
+  .social-grid{
+    grid-template-columns:1fr;
+  }
+}
+
+
+/* ===== MOBILE POLISH / NAV FIX ===== */
+.mobile-menu-btn{
+  display:none;
+  width:46px;
+  height:46px;
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:14px;
+  background:#0d121b;
+  color:#fff;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  gap:5px;
+  cursor:pointer;
+}
+.mobile-menu-btn span{
+  display:block;
+  width:21px;
+  height:2px;
+  border-radius:2px;
+  background:#f4f6fb;
+  transition:transform .2s ease,opacity .2s ease;
+}
+.mobile-menu-btn.open span:first-child{transform:translateY(7px) rotate(45deg);}
+.mobile-menu-btn.open span:nth-child(2){opacity:0;}
+.mobile-menu-btn.open span:last-child{transform:translateY(-7px) rotate(-45deg);}
+
+@media(max-width:760px){
+  html,body{overflow-x:hidden;}
+
+  .site-header{
+    position:sticky;
+    top:0;
+    z-index:9999;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:space-between !important;
+    gap:12px !important;
+  }
+
+  .site-header nav{
+    display:none !important;
+    position:absolute;
+    top:calc(100% + 8px);
+    left:12px;
+    right:12px;
+    width:auto !important;
+    max-width:none !important;
+    padding:12px !important;
+    flex-direction:column !important;
+    align-items:stretch !important;
+    gap:6px !important;
+    border:1px solid rgba(255,255,255,.10);
+    border-radius:18px;
+    background:rgba(9,12,18,.98);
+    box-shadow:0 18px 45px rgba(0,0,0,.45);
+  }
+
+  .site-header nav.mobile-open{
+    display:flex !important;
+  }
+
+  .site-header nav a{
+    display:flex !important;
+    align-items:center;
+    justify-content:space-between;
+    min-height:48px;
+    padding:12px 14px !important;
+    border-radius:12px;
+    white-space:normal !important;
+  }
+
+  .site-header nav .join{
+    justify-content:center !important;
+    margin-top:4px;
+  }
+
+  .mobile-menu-btn{
+    display:flex;
+    flex:0 0 auto;
+  }
+
+  .hero{
+    min-height:auto !important;
+  }
+
+  .hero h1{
+    font-size:clamp(40px,10.5vw,62px) !important;
+    line-height:.98 !important;
+    letter-spacing:-.7px !important;
+  }
+
+  .hero p{
+    font-size:16px !important;
+    line-height:1.6 !important;
+  }
+
+  .hero-actions{
+    gap:10px !important;
+  }
+
+  .hero-actions .btn{
+    width:100% !important;
+    justify-content:center;
+  }
+
+  .social-section{
+    margin-top:48px;
+  }
+}
+
+</style>
+
 </head>
 
 <body>
 
-<header>
-  <a class="logo" href="index.html">HAWKS <b>VERSE</b></a>
+<header class="site-header">
+
+  <a class="logo" href="#">
+  <img src="assets/hawks-verse-logo.png" alt="HAWKS VERSE">
+  <span>
+    HAWKS
+    <b>VERSE</b>
+  </span>
+</a>
 
   <nav>
-    <a href="index.html">Home</a>
-    <a href="index.html#tournaments">Tournaments</a>
-    <a class="join" href="https://whatsapp.com/channel/0029Vb2yCJL7T8bbrrUey840" target="_blank">
-      JOIN HAWKS VERSE
+    <a href="#tournaments">Tournaments</a>
+    <a href="#how">How to Register</a>
+    <a href="#faq">FAQ</a>
+
+    <a
+      class="join"
+      href="https://whatsapp.com/channel/0029Vb2yCJL7T8bbrrUey840"
+      target="_blank"
+      rel="noopener"
+    >
+      <span>◉</span> JOIN WHATSAPP <b>→</b>
     </a>
   </nav>
+
+
+  <button class="mobile-menu-btn" id="mobileMenuBtn" type="button" aria-label="Open menu" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+
 </header>
+
 
 <main>
 
-<section id="register">
-  <small>TOURNAMENT REGISTRATION</small>
-  <h1 id="formTitle">REGISTER YOUR TEAM</h1>
+<!-- HERO -->
 
-  <p>
-    Free Fire MAX squad registration. 4 players are compulsory.
-    Only the IGL needs to submit the registration.
-  </p>
+<section class="hero">
 
-  <div id="dbStatus">Connecting to database...</div>
+  <div class="hero-copy">
 
-  <form id="reg">
+    <small class="eyebrow">FREE FIRE MAX • ESPORTS • COMMUNITY</small>
 
-    <input type="hidden" id="tid">
+    <h1>
+      PLAY.
+      <em>COMPETE.</em>
+      <br>
+      GROW WITH THE HAWKS.
+    </h1>
 
-    <input id="team" placeholder="Team / Squad Name" required>
+    <p>
+      Free-entry Free Fire MAX tournaments built for competitive squads
+      and a growing gaming community.
+    </p>
 
-    <input id="igl" placeholder="IGL In-Game Name" required>
-   <input id="uid1" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="IGL UID" required>
-   <input id="email" type="email" placeholder="IGL Email Address" required>
-<input id="mobile" type="tel" inputmode="numeric" pattern="[0-9]*" placeholder="IGL Mobile Number" required>
-    <input id="p2" placeholder="Player 2 In-Game Name" required>
-<input id="uid2" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="Player 2 UID" required>
+    <div class="hero-actions">
+      <a href="register.html" target="_blank" rel="noopener" class="btn primary">
+        REGISTER HERE <span>→</span>
+      </a>
 
-<input id="p3" placeholder="Player 3 In-Game Name" required>
-<input id="uid3" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="Player 3 UID" required>
+      <a href="#status" class="btn ghost">
+        CHECK REGISTRATION
+      </a>
+    </div>
 
-<input id="p4" placeholder="Player 4 In-Game Name" required>
-<input id="uid4" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="Player 4 UID" required>
+    <div class="hero-points">
+      <span>✦ FREE ENTRY</span>
+      <span>✦ 4 PLAYER SQUADS</span>
+      <span>✦ REGULAR TOURNAMENTS</span>
+    </div>
 
-    <label class="consent">
-      <input type="checkbox" id="consent" required>
-      I confirm that the information submitted is correct and may be used for tournament verification.
-    </label>
+  </div>
 
-    <button class="btn primary" type="submit">
-      SUBMIT REGISTRATION
-    </button>
 
-  </form>
+  <div class="hero-card">
 
-  <div id="result"></div>
+    <div class="hero-card-top">
+      <span id="heroStatus" class="status-pill">LOADING</span>
+      <small>FREE ENTRY</small>
+    </div>
+
+    <div class="poster-wrap">
+      <img
+        id="heroPoster"
+        src="assets/weekly-wars-s2.png"
+        alt="HAWKS VERSE Tournament"
+      >
+    </div>
+
+    <div class="hero-card-bottom">
+
+      <div>
+        <small>FEATURED TOURNAMENT</small>
+        <strong id="heroName">LOADING...</strong>
+        <span id="heroPrize">₹0 PRIZE POOL</span>
+      </div>
+
+      <a href="register.html" target="_blank" rel="noopener" class="round-arrow">→</a>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- MINI STATS -->
+
+<section class="mini-stats">
+
+  <div>
+    <span class="stat-icon">♛</span>
+    <div>
+      <b>FAIR</b>
+      <small>TOURNAMENTS</small>
+    </div>
+  </div>
+
+  <div>
+    <span class="stat-icon">◆</span>
+    <div>
+      <b>SECURE</b>
+      <small>REGISTRATIONS</small>
+    </div>
+  </div>
+
+  <div>
+    <span class="stat-icon">♟</span>
+    <div>
+      <b>ACTIVE</b>
+      <small>COMMUNITY</small>
+    </div>
+  </div>
+
+</section>
+
+
+<!-- TOURNAMENTS -->
+
+<section id="tournaments" class="section">
+
+  <div class="section-heading">
+    <div>
+      <small>TOURNAMENTS</small>
+      <h2>ENTER THE <em>BATTLE.</em></h2>
+    </div>
+
+    <a href="register.html" target="_blank" rel="noopener" class="text-link">
+      REGISTER NOW →
+    </a>
+  </div>
+
+
+  <div class="tournament-card">
+
+    <div class="tournament-poster">
+      <img
+        id="tournamentPoster"
+        src="assets/weekly-wars-s2.png"
+        alt="HAWKS VERSE Tournament"
+      >
+    </div>
+
+    <div class="tournament-info">
+
+      <p class="kicker">CURRENT TOURNAMENT</p>
+
+      <h3 id="tournamentName">LOADING...</h3>
+
+      <div class="facts">
+
+        <span>
+          <b id="prizeFact">₹0</b>
+          <small>PRIZE POOL</small>
+        </span>
+
+        <span>
+          <b>4</b>
+          <small>PLAYERS</small>
+        </span>
+
+        <span>
+          <b>FREE</b>
+          <small>ENTRY FEE</small>
+        </span>
+
+      </div>
+
+      <p>
+        Squad-based Free Fire MAX competition.
+        One IGL registers the complete four-player squad.
+      </p>
+
+      <a class="btn primary" href="register.html" target="_blank" rel="noopener">
+        REGISTER HERE <span>→</span>
+      </a>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- HOW TO REGISTER -->
+
+<section id="how" class="section">
+
+  <div class="section-heading">
+    <div>
+      <small>HOW IT WORKS</small>
+      <h2>4 SIMPLE <em>STEPS.</em></h2>
+    </div>
+  </div>
+
+  <div class="steps">
+
+    <div class="step-card">
+      <b>01</b>
+      <span>Choose the active tournament</span>
+      <small>Pick the tournament you want to enter.</small>
+    </div>
+
+    <div class="step-card">
+      <b>02</b>
+      <span>Click REGISTER HERE</span>
+      <small>Start your squad registration.</small>
+    </div>
+
+    <div class="step-card">
+      <b>03</b>
+      <span>Fill squad details</span>
+      <small>Enter all 4 players correctly.</small>
+    </div>
+
+    <div class="step-card">
+      <b>04</b>
+      <span>Save your Registration ID</span>
+      <small>Use it later to check your status.</small>
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- STATUS CHECK -->
+
+<section id="status" class="section status-section">
+
+  <div class="status-shell">
+
+    <div class="status-heading">
+      <div class="big-icon">⌕</div>
+
+      <div>
+        <small>REGISTRATION MANAGEMENT</small>
+        <h2>CHECK YOUR <em>REGISTRATION.</em></h2>
+        <p>
+          Verify your registration using your Registration ID
+          and IGL Mobile Number.
+        </p>
+      </div>
+    </div>
+
+
+    <form id="check" class="check-form">
+
+      <div>
+        <label>REGISTRATION ID</label>
+        <input
+          id="rid"
+          type="text"
+          placeholder="HV-FM-001"
+          required
+        >
+      </div>
+
+      <div>
+        <label>IGL MOBILE NUMBER</label>
+        <input
+          id="checkMobile"
+          type="tel"
+          inputmode="numeric"
+          placeholder="Enter IGL mobile number"
+          required
+        >
+      </div>
+
+      <button class="btn primary" type="submit">
+        VERIFY & CHECK →
+      </button>
+
+    </form>
+
+
+    <div id="checkResult" class="check-result"></div>
+
+  </div>
+
+</section>
+
+
+<!-- EDIT REGISTRATION -->
+
+<section id="edit-registration" class="section edit-section">
+
+  <div class="status-shell">
+
+    <div class="status-heading">
+
+      <div class="big-icon edit-icon">✎</div>
+
+      <div>
+        <small>PARTICIPANT ACCESS</small>
+        <h2>EDIT YOUR <em>REGISTRATION.</em></h2>
+
+        <p>
+          Enter your Registration ID and IGL Mobile Number to
+          access your squad details.
+        </p>
+      </div>
+
+    </div>
+
+
+    <form id="editVerify" class="check-form">
+
+      <div>
+        <label>REGISTRATION ID</label>
+        <input
+          id="editRid"
+          type="text"
+          placeholder="HV-FM-013"
+          required
+        >
+      </div>
+
+      <div>
+        <label>IGL MOBILE NUMBER</label>
+        <input
+          id="editMobile"
+          type="tel"
+          placeholder="Enter IGL mobile number"
+          required
+        >
+      </div>
+
+      <button class="btn primary" type="submit">
+        VERIFY & EDIT →
+      </button>
+
+    </form>
+
+
+    <div id="editMessage" class="edit-message"></div>
+
+
+    <form id="editForm" class="edit-form" style="display:none;">
+
+      <input type="hidden" id="editOriginalRid">
+      <input type="hidden" id="editOriginalMobile">
+
+
+      <div class="form-grid">
+
+        <input
+          id="editTeam"
+          type="text"
+          placeholder="Team / Squad Name"
+          required
+        >
+
+        <input
+          id="editIgl"
+          type="text"
+          placeholder="IGL In-Game Name"
+          required
+        >
+
+        <input
+          id="editIglUid"
+          type="text"
+          placeholder="IGL UID"
+          required
+        >
+
+        <input
+          id="editNewMobile"
+          type="tel"
+          placeholder="IGL Mobile Number"
+          required
+        >
+
+        <input
+          id="editIglEmail"
+          type="email"
+          placeholder="IGL Email Address"
+          required
+        >
+
+        <input
+          id="editP2"
+          type="text"
+          placeholder="Player 2 In-Game Name"
+          required
+        >
+
+        <input
+          id="editUid2"
+          type="text"
+          placeholder="Player 2 UID"
+          required
+        >
+
+        <input
+          id="editP3"
+          type="text"
+          placeholder="Player 3 In-Game Name"
+          required
+        >
+
+        <input
+          id="editUid3"
+          type="text"
+          placeholder="Player 3 UID"
+          required
+        >
+
+        <input
+          id="editP4"
+          type="text"
+          placeholder="Player 4 In-Game Name"
+          required
+        >
+
+        <input
+          id="editUid4"
+          type="text"
+          placeholder="Player 4 UID"
+          required
+        >
+
+      </div>
+
+
+      <div id="editCurrentStatus" class="current-status"></div>
+
+
+      <button class="btn primary form-submit" type="submit">
+        SAVE CHANGES →
+      </button>
+
+    </form>
+
+
+    <div id="editResult" class="edit-result"></div>
+
+  </div>
+
+</section>
+
+
+<!-- FAQ -->
+
+<section id="faq" class="section faq-section">
+
+  <div class="section-heading">
+    <div>
+      <small>FAQ</small>
+      <h2>QUICK <em>ANSWERS.</em></h2>
+    </div>
+  </div>
+
+
+  <div class="faq-list">
+
+    <details>
+      <summary>
+        Is registration free?
+        <span>+</span>
+      </summary>
+      <p>
+        Yes. HAWKS VERSE tournament registration is completely free.
+      </p>
+    </details>
+
+    <details>
+      <summary>
+        Are 4 players compulsory?
+        <span>+</span>
+      </summary>
+      <p>
+        Yes. Every squad must have exactly 4 players.
+      </p>
+    </details>
+
+    <details>
+      <summary>
+        Who can register?
+        <span>+</span>
+      </summary>
+      <p>
+        Any Free Fire MAX player can register.
+      </p>
+    </details>
+
+    <details>
+      <summary>
+        What is Registration ID?
+        <span>+</span>
+      </summary>
+      <p>
+        It is the unique ID generated after successful registration.
+      </p>
+    </details>
+
+    <details>
+      <summary>
+        How can I check my status?
+        <span>+</span>
+      </summary>
+      <p>
+        Enter your Registration ID and IGL Mobile Number in the
+        Registration Management section.
+      </p>
+    </details>
+
+  </div>
+
+</section>
+
+
+
+<!-- SOCIALS -->
+<section class="social-section">
+
+  <div class="social-heading">
+    <small>STAY CONNECTED</small>
+    <h2>FOLLOW THE <em>HAWKS.</em></h2>
+    <p>
+      Follow HAWKS VERSE for tournament updates, videos, community news and announcements.
+    </p>
+  </div>
+
+  <div class="social-grid">
+
+    <!-- Replace href="#" with the real Instagram URL -->
+    <a id="socialInstagram" class="social-card" href="#" target="_blank" rel="noopener" aria-label="Instagram">
+      <span class="social-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24">
+          <path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5Zm0 2A3 3 0 0 0 4 7v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7Zm5 3.5A4.5 4.5 0 1 1 7.5 12 4.5 4.5 0 0 1 12 7.5Zm0 2A2.5 2.5 0 1 0 14.5 12 2.5 2.5 0 0 0 12 9.5ZM17.8 6.2a1.2 1.2 0 1 1-1.2 1.2 1.2 1.2 0 0 1 1.2-1.2Z"/>
+        </svg>
+      </span>
+      <span class="social-copy">
+        <strong>Instagram</strong>
+        <span>Follow us</span>
+      </span>
+      <span class="social-arrow">→</span>
+    </a>
+
+    <!-- Replace href="#" with the real YouTube URL -->
+    <a id="socialYoutube" class="social-card" href="#" target="_blank" rel="noopener" aria-label="YouTube">
+      <span class="social-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24">
+          <path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8ZM9.5 15.5v-7l6 3.5-6 3.5Z"/>
+        </svg>
+      </span>
+      <span class="social-copy">
+        <strong>YouTube</strong>
+        <span>Watch us</span>
+      </span>
+      <span class="social-arrow">→</span>
+    </a>
+
+    <!-- Replace href="#" with the real Discord invite URL -->
+    <a id="socialDiscord" class="social-card" href="#" target="_blank" rel="noopener" aria-label="Discord">
+      <span class="social-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24">
+          <path d="M19.5 4.5A16.4 16.4 0 0 0 15.7 3l-.5 1a15 15 0 0 0-6.4 0l-.5-1a16.4 16.4 0 0 0-3.8 1.5C2.1 8.1 1.5 11.7 1.8 15.2a15.2 15.2 0 0 0 4.7 2.4l1.1-1.6c-.7-.3-1.3-.7-1.9-1.1l.5-.4c3.7 1.7 7.7 1.7 11.3 0l.5.4c-.6.4-1.2.8-1.9 1.1l1.1 1.6a15.2 15.2 0 0 0 4.7-2.4c.4-4.1-.7-7.7-2.4-10.7ZM8.5 13.8c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2Zm7 0c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2Z"/>
+        </svg>
+      </span>
+      <span class="social-copy">
+        <strong>Discord</strong>
+        <span>Join server</span>
+      </span>
+      <span class="social-arrow">→</span>
+    </a>
+
+  </div>
+
+</section>
+
+
+<!-- BOTTOM CTA -->
+
+<section class="community-cta">
+
+  <div>
+    <small>HAWKS VERSE COMMUNITY</small>
+    <h2>MORE THAN JUST A <em>GAME.</em></h2>
+    <p>
+      Join the community and stay updated about upcoming tournaments.
+    </p>
+  </div>
+
+  <a
+    class="btn primary"
+    href="https://whatsapp.com/channel/0029Vb2yCJL7T8bbrrUey840"
+    target="_blank"
+    rel="noopener"
+  >
+    JOIN HAWKS VERSE →
+  </a>
 
 </section>
 
 </main>
 
-<footer>
-  <b>HAWKS <i>VERSE</i></b>
-  <span>PLAY. COMPETE. RISE.</span>
 
-  <a href="https://whatsapp.com/channel/0029Vb2yCJL7T8bbrrUey840" target="_blank">
+<footer>
+
+  <div class="footer-brand">
+    <b>⚡ HAWKS <i>VERSE</i></b>
+    <span>PLAY • COMPETE • RISE.</span>
+  </div>
+
+  <div class="footer-links">
+    <a href="#tournaments">Tournaments</a>
+    <a href="register.html" target="_blank" rel="noopener">Register</a>
+    <a href="#status">Check Registration</a>
+    <a href="#faq">FAQ</a>
+  </div>
+
+  <a
+    class="footer-whatsapp"
+    href="https://whatsapp.com/channel/0029Vb2yCJL7T8bbrrUey840"
+    target="_blank"
+    rel="noopener"
+  >
     WhatsApp Community
   </a>
 
-  <span>© HAWKS VERSE</span>
+  <span class="copyright">
+    © 2026 HAWKS VERSE. ALL RIGHTS RESERVED.
+  </span>
+
 </footer>
+
+
+
+<script>
+(() => {
+  const btn = document.getElementById("mobileMenuBtn");
+  const nav = document.querySelector(".site-header nav");
+  if (!btn || !nav) return;
+
+  const closeMenu = () => {
+    nav.classList.remove("mobile-open");
+    btn.classList.remove("open");
+    btn.setAttribute("aria-expanded", "false");
+    btn.setAttribute("aria-label", "Open menu");
+  };
+
+  btn.addEventListener("click", () => {
+    const open = nav.classList.toggle("mobile-open");
+    btn.classList.toggle("open", open);
+    btn.setAttribute("aria-expanded", String(open));
+    btn.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+  });
+
+  nav.querySelectorAll("a").forEach(a => a.addEventListener("click", closeMenu));
+})();
+</script>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
