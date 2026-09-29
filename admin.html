@@ -162,6 +162,51 @@ input[type=file]{padding:10px}input[type=checkbox]{width:17px;height:17px;accent
     .group-email-btn{margin-left:8px}
     .group-email-status{margin-top:10px;font-size:12px;color:#aab3c2;line-height:1.5}
 
+
+    /* ===== SOCIAL LINKS MANAGEMENT ===== */
+    .social-admin-grid{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:14px;
+      margin-top:18px;
+    }
+    .social-admin-box{
+      padding:16px;
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:15px;
+      background:linear-gradient(145deg,#101620,#080b11);
+    }
+    .social-admin-title{
+      display:flex;
+      align-items:center;
+      gap:9px;
+      margin-bottom:8px;
+      font-weight:900;
+      font-size:13px;
+    }
+    .social-admin-hint{
+      margin-top:7px;
+      color:#7f8999;
+      font-size:11px;
+      line-height:1.45;
+    }
+    .social-save-row{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-top:16px;
+    }
+    .social-admin-status{
+      color:#aab3c2;
+      font-size:12px;
+      line-height:1.5;
+    }
+    @media(max-width:760px){
+      .social-admin-grid{grid-template-columns:1fr}
+    }
+
 </style>
 </head>
 
@@ -413,6 +458,71 @@ input[type=file]{padding:10px}input[type=checkbox]{width:17px;height:17px;accent
 
   </div>
 </div>
+
+
+
+<!-- SOCIAL LINKS MANAGEMENT -->
+<div class="card" style="margin-top:20px;">
+  <div class="topbar">
+    <div>
+      <h2>Social Links</h2>
+      <div class="muted">
+        Update the Instagram, YouTube and Discord links shown on the homepage.
+      </div>
+    </div>
+    <span class="status">HOMEPAGE</span>
+  </div>
+
+  <div class="social-admin-grid">
+
+    <div class="social-admin-box">
+      <div class="social-admin-title">Instagram</div>
+      <input
+        id="socialInstagramUrl"
+        type="url"
+        placeholder="https://instagram.com/yourusername"
+      >
+      <div class="social-admin-hint">
+        Leave blank to hide Instagram from the homepage.
+      </div>
+    </div>
+
+    <div class="social-admin-box">
+      <div class="social-admin-title">YouTube</div>
+      <input
+        id="socialYoutubeUrl"
+        type="url"
+        placeholder="https://youtube.com/@yourchannel"
+      >
+      <div class="social-admin-hint">
+        Paste your channel URL.
+      </div>
+    </div>
+
+    <div class="social-admin-box">
+      <div class="social-admin-title">Discord</div>
+      <input
+        id="socialDiscordUrl"
+        type="url"
+        placeholder="https://discord.gg/yourinvite"
+      >
+      <div class="social-admin-hint">
+        Paste your Discord server/invite URL.
+      </div>
+    </div>
+
+  </div>
+
+  <div class="social-save-row">
+    <div id="socialSettingsStatus" class="social-admin-status">
+      Loading current social links...
+    </div>
+    <button id="saveSocialSettingsBtn" class="primary">
+      SAVE SOCIAL LINKS
+    </button>
+  </div>
+</div>
+
 
 
 <!-- REGISTRATIONS -->
@@ -1716,46 +1826,14 @@ window.sendGroupEmails = async function(id) {
     if (error) {
       console.error("Group email error:", error);
 
-      let serverDetails = "";
-
-      try {
-        if (error.context) {
-          const response = error.context;
-          const clone = response.clone ? response.clone() : response;
-          const body = await clone.json().catch(async () => {
-            const text = await clone.text().catch(() => "");
-            return text ? { raw: text } : {};
-          });
-
-          serverDetails =
-            body?.error ||
-            body?.details ||
-            body?.message ||
-            (body?.raw ? String(body.raw) : "");
-        }
-      } catch (readError) {
-        console.error("Could not read Edge Function error body:", readError);
-      }
-
-      const statusCode =
-        error.context?.status ||
-        error.status ||
-        "unknown";
-
-      const message =
-        serverDetails ||
-        error.message ||
-        "Unknown Edge Function error";
-
       if (statusEl) {
         statusEl.textContent =
-          `Email sending failed (${statusCode}): ${message}`;
+          `Email sending failed: ${error.message || "Unknown error"}`;
       }
 
       alert(
         "Group email sending failed.\n\n" +
-        `HTTP ${statusCode}\n` +
-        message
+        (error.message || "Unknown error")
       );
 
       return;
@@ -2006,12 +2084,158 @@ document.getElementById("refreshGroupsBtn").addEventListener("click", () => {
   loadGroupsForTournament(document.getElementById("groupTournament").value);
 });
 
+
+// ==================== SOCIAL LINKS MANAGEMENT ====================
+
+async function loadSocialSettings() {
+  const status = document.getElementById("socialSettingsStatus");
+
+  if (status) {
+    status.textContent = "Loading current social links...";
+  }
+
+  const { data, error } = await client
+    .from("site_settings")
+    .select("id, instagram_url, youtube_url, discord_url")
+    .eq("id", 1)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Social settings load error:", error);
+
+    if (status) {
+      status.textContent =
+        "Could not load social links: " + error.message;
+    }
+
+    return;
+  }
+
+  document.getElementById("socialInstagramUrl").value =
+    data?.instagram_url || "";
+
+  document.getElementById("socialYoutubeUrl").value =
+    data?.youtube_url || "";
+
+  document.getElementById("socialDiscordUrl").value =
+    data?.discord_url || "";
+
+  if (status) {
+    status.textContent = "Current social links loaded.";
+  }
+}
+
+function validateSocialUrl(value, label, allowedHosts) {
+  const url = String(value || "").trim();
+
+  if (!url) return null;
+
+  try {
+    const parsed = new URL(url);
+
+    if (parsed.protocol !== "https:") {
+      throw new Error(`${label} must use https://`);
+    }
+
+    const host = parsed.hostname.toLowerCase();
+
+    if (
+      !allowedHosts.some(
+        allowed => host === allowed || host.endsWith("." + allowed)
+      )
+    ) {
+      throw new Error(`${label} URL is not valid for this platform.`);
+    }
+
+    return parsed.href;
+  } catch (err) {
+    throw new Error(err.message || `${label} URL is invalid.`);
+  }
+}
+
+async function saveSocialSettings() {
+  const status = document.getElementById("socialSettingsStatus");
+  const button = document.getElementById("saveSocialSettingsBtn");
+
+  let instagram_url;
+  let youtube_url;
+  let discord_url;
+
+  try {
+    instagram_url = validateSocialUrl(
+      document.getElementById("socialInstagramUrl").value,
+      "Instagram",
+      ["instagram.com"]
+    );
+
+    youtube_url = validateSocialUrl(
+      document.getElementById("socialYoutubeUrl").value,
+      "YouTube",
+      ["youtube.com", "youtu.be"]
+    );
+
+    discord_url = validateSocialUrl(
+      document.getElementById("socialDiscordUrl").value,
+      "Discord",
+      ["discord.com", "discord.gg"]
+    );
+  } catch (err) {
+    if (status) status.textContent = err.message;
+    return;
+  }
+
+  button.disabled = true;
+  button.textContent = "SAVING...";
+
+  if (status) {
+    status.textContent = "Saving social links...";
+  }
+
+  const { error } = await client
+    .from("site_settings")
+    .upsert(
+      {
+        id: 1,
+        instagram_url,
+        youtube_url,
+        discord_url,
+        updated_at: new Date().toISOString()
+      },
+      { onConflict: "id" }
+    );
+
+  button.disabled = false;
+  button.textContent = "SAVE SOCIAL LINKS";
+
+  if (error) {
+    console.error("Social settings save error:", error);
+
+    if (status) {
+      status.textContent =
+        "Save failed: " + error.message;
+    }
+
+    return;
+  }
+
+  if (status) {
+    status.textContent =
+      "✓ Social links saved. Refresh the homepage to see changes.";
+  }
+
+  showToast("Social links updated successfully.");
+}
+
+document.getElementById("saveSocialSettingsBtn")
+  .addEventListener("click", saveSocialSettings);
+
 // Make tournament loading happen whenever admin panel opens.
 const oldShowAdmin = showAdmin;
 
 showAdmin = function() {
   oldShowAdmin();
   loadTournaments();
+  loadSocialSettings();
 };
 
 client.auth.onAuthStateChange((event, session) => {
