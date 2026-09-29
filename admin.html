@@ -1716,14 +1716,46 @@ window.sendGroupEmails = async function(id) {
     if (error) {
       console.error("Group email error:", error);
 
+      let serverDetails = "";
+
+      try {
+        if (error.context) {
+          const response = error.context;
+          const clone = response.clone ? response.clone() : response;
+          const body = await clone.json().catch(async () => {
+            const text = await clone.text().catch(() => "");
+            return text ? { raw: text } : {};
+          });
+
+          serverDetails =
+            body?.error ||
+            body?.details ||
+            body?.message ||
+            (body?.raw ? String(body.raw) : "");
+        }
+      } catch (readError) {
+        console.error("Could not read Edge Function error body:", readError);
+      }
+
+      const statusCode =
+        error.context?.status ||
+        error.status ||
+        "unknown";
+
+      const message =
+        serverDetails ||
+        error.message ||
+        "Unknown Edge Function error";
+
       if (statusEl) {
         statusEl.textContent =
-          `Email sending failed: ${error.message || "Unknown error"}`;
+          `Email sending failed (${statusCode}): ${message}`;
       }
 
       alert(
         "Group email sending failed.\n\n" +
-        (error.message || "Unknown error")
+        `HTTP ${statusCode}\n` +
+        message
       );
 
       return;
