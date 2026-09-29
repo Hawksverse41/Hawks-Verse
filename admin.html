@@ -405,7 +405,7 @@ input[type=file]{padding:10px}input[type=checkbox]{width:17px;height:17px;accent
     </div>
 
     <div class="group-toolbar">
-      <button id="autoAssignGroupsBtn" class="primary">AUTO ASSIGN CONFIRMED TEAMS</button>
+      <button id="autoAssignGroupsBtn" class="primary">AUTO ASSIGN REGISTERED + CONFIRMED</button>
       <button id="refreshGroupsBtn" class="secondary">REFRESH GROUPS</button>
     </div>
 
@@ -1798,7 +1798,7 @@ async function autoAssignConfirmedTeams() {
     .from("registrations")
     .select("id, registration_id, team_name, igl_name")
     .eq("tournament_id", tournamentId)
-    .eq("status", "confirmed")
+    .in("status", ["registered", "confirmed"])
     .order("created_at", { ascending: true });
 
   if (regError) {
@@ -1820,7 +1820,7 @@ async function autoAssignConfirmedTeams() {
   const pending = (confirmed || []).filter(r => !assignedIds.has(r.id));
 
   if (!pending.length) {
-    showToast("All confirmed teams are already assigned.");
+    showToast("All registered/confirmed teams are already assigned.");
     await loadGroupsForTournament(tournamentId);
     return;
   }
@@ -1847,7 +1847,7 @@ async function autoAssignConfirmedTeams() {
   }
 
   button.disabled = false;
-  button.textContent = "AUTO ASSIGN CONFIRMED TEAMS";
+  button.textContent = "AUTO ASSIGN REGISTERED + CONFIRMED";
 
   await loadGroupsForTournament(tournamentId);
 
@@ -1857,7 +1857,7 @@ async function autoAssignConfirmedTeams() {
       `Unassigned teams may be due to all group slots being full.`
     );
   } else {
-    showToast(`${assignedCount} confirmed team(s) assigned successfully.`);
+    showToast(`${assignedCount} registered/confirmed team(s) assigned successfully.`);
   }
 }
 
