@@ -422,6 +422,7 @@ async function loadRegistrations() {
       igl_name,
       igl_uid,
       igl_mobile,
+      igl_email,
       player2_name,
       player2_uid,
       player3_name,
@@ -603,47 +604,97 @@ window.viewRegistration = function(id) {
 
   box.innerHTML = `
 
-    <h3>
-      Registration Details —
-      ${escapeHtml(r.registration_id)}
-    </h3>
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;margin-bottom:18px;">
+      <div>
+        <div class="detail-label">REGISTRATION</div>
+        <h3 style="margin:4px 0 0;">
+          ${escapeHtml(r.registration_id)}
+        </h3>
+        <div class="muted" style="margin-top:5px;">
+          Admin can edit team and player information here.
+        </div>
+      </div>
+      <span class="status">${formatStatus(r.status)}</span>
+    </div>
 
     <div class="detail-grid">
 
       ${detail("Tournament", tournament)}
-      ${detail("Team / Squad", r.team_name)}
-      ${detail("IGL Name", r.igl_name)}
-      ${detail("IGL UID", r.igl_uid)}
-      ${detail("IGL Mobile", r.igl_mobile)}
-
-      ${detail("Player 2", r.player2_name)}
-      ${detail("Player 2 UID", r.player2_uid)}
-
-      ${detail("Player 3", r.player3_name)}
-      ${detail("Player 3 UID", r.player3_uid)}
-
-      ${detail("Player 4", r.player4_name)}
-      ${detail("Player 4 UID", r.player4_uid)}
-
       ${detail("Created", new Date(r.created_at).toLocaleString())}
 
     </div>
 
-    <label>Status</label>
+    <div class="detail-grid" style="margin-top:12px;">
+
+      <label>
+        Team / Squad Name
+        <input id="editTeamName" value="${escapeHtml(r.team_name || "")}" autocomplete="off">
+      </label>
+
+      <label>
+        IGL In-Game Name
+        <input id="editIglName" value="${escapeHtml(r.igl_name || "")}" autocomplete="off">
+      </label>
+
+      <label>
+        IGL UID
+        <input id="editIglUid" value="${escapeHtml(r.igl_uid || "")}" autocomplete="off">
+      </label>
+
+      <label>
+        IGL Email
+        <input id="editIglEmail" type="email" value="${escapeHtml(r.igl_email || "")}" autocomplete="off">
+      </label>
+
+      <label>
+        IGL Mobile
+        <input id="editIglMobile" value="${escapeHtml(r.igl_mobile || "")}" autocomplete="off">
+      </label>
+
+      <label>
+        Player 2 In-Game Name
+        <input id="editP2Name" value="${escapeHtml(r.player2_name || "")}" autocomplete="off">
+      </label>
+
+      <label>
+        Player 2 UID
+        <input id="editP2Uid" value="${escapeHtml(r.player2_uid || "")}" autocomplete="off">
+      </label>
+
+      <label>
+        Player 3 In-Game Name
+        <input id="editP3Name" value="${escapeHtml(r.player3_name || "")}" autocomplete="off">
+      </label>
+
+      <label>
+        Player 3 UID
+        <input id="editP3Uid" value="${escapeHtml(r.player3_uid || "")}" autocomplete="off">
+      </label>
+
+      <label>
+        Player 4 In-Game Name
+        <input id="editP4Name" value="${escapeHtml(r.player4_name || "")}" autocomplete="off">
+      </label>
+
+      <label>
+        Player 4 UID
+        <input id="editP4Uid" value="${escapeHtml(r.player4_uid || "")}" autocomplete="off">
+      </label>
+
+    </div>
+
+    <label style="margin-top:16px;">Status</label>
 
     <select id="editStatus">
       <option value="registered" ${r.status === "registered" ? "selected" : ""}>
         Registered
       </option>
-
       <option value="under_review" ${r.status === "under_review" ? "selected" : ""}>
         Under Review
       </option>
-
       <option value="confirmed" ${r.status === "confirmed" ? "selected" : ""}>
         Confirmed
       </option>
-
       <option value="rejected" ${r.status === "rejected" ? "selected" : ""}>
         Rejected
       </option>
@@ -693,9 +744,61 @@ window.saveRegistration = async function() {
   const admin_note =
     document.getElementById("adminNote").value.trim();
 
+  const team_name =
+    document.getElementById("editTeamName").value.trim();
+
+  const igl_name =
+    document.getElementById("editIglName").value.trim();
+
+  const igl_uid =
+    document.getElementById("editIglUid").value.trim();
+
+  const igl_email =
+    document.getElementById("editIglEmail").value.trim();
+
+  const igl_mobile =
+    document.getElementById("editIglMobile").value.trim();
+
+  const player2_name =
+    document.getElementById("editP2Name").value.trim();
+
+  const player2_uid =
+    document.getElementById("editP2Uid").value.trim();
+
+  const player3_name =
+    document.getElementById("editP3Name").value.trim();
+
+  const player3_uid =
+    document.getElementById("editP3Uid").value.trim();
+
+  const player4_name =
+    document.getElementById("editP4Name").value.trim();
+
+  const player4_uid =
+    document.getElementById("editP4Uid").value.trim();
+
+  if (!team_name || !igl_name || !igl_uid || !igl_mobile ||
+      !player2_name || !player2_uid ||
+      !player3_name || !player3_uid ||
+      !player4_name || !player4_uid) {
+    alert("Please fill all required registration fields.");
+    return;
+  }
+
   const { error } = await client
     .from("registrations")
     .update({
+      team_name,
+      igl_name,
+      igl_uid,
+      igl_email,
+      igl_mobile,
+      player2_name,
+      player2_uid,
+      player3_name,
+      player3_uid,
+      player4_name,
+      player4_uid,
       status,
       admin_note,
       updated_at: new Date().toISOString()
@@ -709,7 +812,7 @@ window.saveRegistration = async function() {
     return;
   }
 
-  showToast("Registration updated successfully.");
+  showToast("Registration details updated successfully.");
 
   await loadRegistrations();
 
