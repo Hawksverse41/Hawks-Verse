@@ -140,6 +140,119 @@
     grid-template-columns:1fr;
   }
 }
+
+
+/* ===== MOBILE POLISH / NAV FIX ===== */
+.mobile-menu-btn{
+  display:none;
+  width:46px;
+  height:46px;
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:14px;
+  background:#0d121b;
+  color:#fff;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  gap:5px;
+  cursor:pointer;
+}
+.mobile-menu-btn span{
+  display:block;
+  width:21px;
+  height:2px;
+  border-radius:2px;
+  background:#f4f6fb;
+  transition:transform .2s ease,opacity .2s ease;
+}
+.mobile-menu-btn.open span:first-child{transform:translateY(7px) rotate(45deg);}
+.mobile-menu-btn.open span:nth-child(2){opacity:0;}
+.mobile-menu-btn.open span:last-child{transform:translateY(-7px) rotate(-45deg);}
+
+@media(max-width:760px){
+  html,body{overflow-x:hidden;}
+
+  .site-header{
+    position:sticky;
+    top:0;
+    z-index:9999;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:space-between !important;
+    gap:12px !important;
+  }
+
+  .site-header nav{
+    display:none !important;
+    position:absolute;
+    top:calc(100% + 8px);
+    left:12px;
+    right:12px;
+    width:auto !important;
+    max-width:none !important;
+    padding:12px !important;
+    flex-direction:column !important;
+    align-items:stretch !important;
+    gap:6px !important;
+    border:1px solid rgba(255,255,255,.10);
+    border-radius:18px;
+    background:rgba(9,12,18,.98);
+    box-shadow:0 18px 45px rgba(0,0,0,.45);
+  }
+
+  .site-header nav.mobile-open{
+    display:flex !important;
+  }
+
+  .site-header nav a{
+    display:flex !important;
+    align-items:center;
+    justify-content:space-between;
+    min-height:48px;
+    padding:12px 14px !important;
+    border-radius:12px;
+    white-space:normal !important;
+  }
+
+  .site-header nav .join{
+    justify-content:center !important;
+    margin-top:4px;
+  }
+
+  .mobile-menu-btn{
+    display:flex;
+    flex:0 0 auto;
+  }
+
+  .hero{
+    min-height:auto !important;
+  }
+
+  .hero h1{
+    font-size:clamp(40px,10.5vw,62px) !important;
+    line-height:.98 !important;
+    letter-spacing:-.7px !important;
+  }
+
+  .hero p{
+    font-size:16px !important;
+    line-height:1.6 !important;
+  }
+
+  .hero-actions{
+    gap:10px !important;
+  }
+
+  .hero-actions .btn{
+    width:100% !important;
+    justify-content:center;
+  }
+
+  .social-section{
+    margin-top:48px;
+  }
+}
+
 </style>
 
 </head>
@@ -170,6 +283,11 @@
       <span>◉</span> JOIN WHATSAPP <b>→</b>
     </a>
   </nav>
+
+
+  <button class="mobile-menu-btn" id="mobileMenuBtn" type="button" aria-label="Open menu" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
 
 </header>
 
@@ -868,6 +986,31 @@
 
 </footer>
 
+
+
+<script>
+(() => {
+  const btn = document.getElementById("mobileMenuBtn");
+  const nav = document.querySelector(".site-header nav");
+  if (!btn || !nav) return;
+
+  const closeMenu = () => {
+    nav.classList.remove("mobile-open");
+    btn.classList.remove("open");
+    btn.setAttribute("aria-expanded", "false");
+    btn.setAttribute("aria-label", "Open menu");
+  };
+
+  btn.addEventListener("click", () => {
+    const open = nav.classList.toggle("mobile-open");
+    btn.classList.toggle("open", open);
+    btn.setAttribute("aria-expanded", String(open));
+    btn.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+  });
+
+  nav.querySelectorAll("a").forEach(a => a.addEventListener("click", closeMenu));
+})();
+</script>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
