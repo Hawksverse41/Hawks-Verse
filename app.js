@@ -180,6 +180,8 @@ if (checkForm) {
 
     let groupHtml = "";
 
+    // Group information is returned only for this registration.
+    // The SQL RPC should expose the group only when it is published.
     if (x.group_name) {
       groupHtml = `
         <div class="registration-group">
@@ -226,19 +228,14 @@ if (checkForm) {
       $("checkResult").innerHTML =
         "Team: <b>" + escapeHtml(x.team_name || "") + "</b><br>" +
         "Status: <b>" + escapeHtml(status) + "</b><br>" +
-        "Registration ID: <b>" +
-        escapeHtml(x.registration_id || registrationId) +
-        "</b>" +
+        "Registration ID: <b>" + escapeHtml(x.registration_id || registrationId) + "</b>" +
         groupHtml;
     }
   };
 }
 
 
-// ===============================
-// SAFE HTML HELPERS
-// ===============================
-
+// Safe HTML helpers used by registration status output
 function escapeHtml(value) {
   return String(value ?? "")
     .replace(/&/g, "&amp;")
@@ -254,13 +251,11 @@ function safeUrl(value) {
   try {
     const parsed = new URL(url);
 
-    if (
-      parsed.protocol === "https:" &&
-      (
-        parsed.hostname === "chat.whatsapp.com" ||
-        parsed.hostname === "whatsapp.com"
-      )
-    ) {
+    if (parsed.protocol === "https:" && parsed.hostname === "chat.whatsapp.com") {
+      return parsed.href;
+    }
+
+    if (parsed.protocol === "https:" && parsed.hostname === "whatsapp.com") {
       return parsed.href;
     }
   } catch (_) {}
@@ -271,6 +266,7 @@ function safeUrl(value) {
 
 // =========================================================
 // PARTICIPANT EDIT REGISTRATION
+// Verification: Registration ID + IGL Mobile
 // =========================================================
 
 const editVerifyForm = document.getElementById("editVerify");
@@ -321,6 +317,13 @@ if (editVerifyForm) {
     document.getElementById("editIgl").value = r.igl_name || "";
     document.getElementById("editIglUid").value = r.igl_uid || "";
     document.getElementById("editNewMobile").value = r.igl_mobile || "";
+
+    const editEmail = document.getElementById("editIglEmail");
+    if (editEmail) {
+      editEmail.value = r.igl_email || "";
+      editEmail.readOnly = true;
+      editEmail.title = "Email is kept as the registered contact address.";
+    }
 
     document.getElementById("editP2").value = r.player2_name || "";
     document.getElementById("editUid2").value = r.player2_uid || "";
