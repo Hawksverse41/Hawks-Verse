@@ -50,6 +50,23 @@ async function boot() {
 
     if ($("tid")) $("tid").value = t.id;
 
+    // Load homepage social links managed from the admin panel.
+    try {
+      const socialResult = await db
+        .from("site_settings")
+        .select("instagram_url,youtube_url,discord_url")
+        .eq("id", 1)
+        .maybeSingle();
+
+      if (!socialResult.error && socialResult.data) {
+        applySocialLink("socialInstagram", socialResult.data.instagram_url);
+        applySocialLink("socialYoutube", socialResult.data.youtube_url);
+        applySocialLink("socialDiscord", socialResult.data.discord_url);
+      }
+    } catch (socialError) {
+      console.warn("HAWKS VERSE social links:", socialError);
+    }
+
     if ($("dbStatus")) {
       $("dbStatus").textContent =
         "✓ Database connected — registration ready.";
@@ -63,6 +80,58 @@ async function boot() {
         "Database connection failed. Please try again.";
       $("dbStatus").className = "error";
     }
+  }
+}
+
+
+// ===============================
+// SOCIAL LINKS
+// ===============================
+
+function applySocialLink(elementId, value) {
+  const element = document.getElementById(elementId);
+  if (!element) return;
+
+  const url = String(value || "").trim();
+
+  if (!url) {
+    element.style.display = "none";
+    element.removeAttribute("href");
+    return;
+  }
+
+  if (!isAllowedSocialUrl(url)) {
+    element.style.display = "none";
+    element.removeAttribute("href");
+    return;
+  }
+
+  element.href = url;
+  element.target = "_blank";
+  element.rel = "noopener";
+  element.style.display = "flex";
+}
+
+function isAllowedSocialUrl(value) {
+  try {
+    const parsed = new URL(value);
+
+    if (parsed.protocol !== "https:") return false;
+
+    const host = parsed.hostname.toLowerCase();
+
+    return (
+      host === "instagram.com" ||
+      host.endsWith(".instagram.com") ||
+      host === "youtube.com" ||
+      host.endsWith(".youtube.com") ||
+      host === "youtu.be" ||
+      host === "discord.com" ||
+      host.endsWith(".discord.com") ||
+      host === "discord.gg"
+    );
+  } catch (_) {
+    return false;
   }
 }
 
@@ -180,23 +249,24 @@ if (checkForm) {
 
     let groupHtml = "";
 
-    // Group information is returned only for this registration.
-    // The SQL RPC should expose the group only when it is published.
     if (x.group_name) {
       groupHtml = `
         <div class="registration-group">
           <div class="group-label">YOUR ASSIGNED GROUP</div>
           <div class="group-name">${escapeHtml(x.group_name)}</div>
+
           ${
             x.group_number
               ? `<div class="group-number">GROUP ${escapeHtml(String(x.group_number))}</div>`
               : ""
           }
+
           ${
             x.group_instructions
               ? `<p class="group-instructions">${escapeHtml(x.group_instructions)}</p>`
               : ""
           }
+
           ${
             x.whatsapp_link
               ? `
@@ -235,7 +305,10 @@ if (checkForm) {
 }
 
 
-// Safe HTML helpers used by registration status output
+// ===============================
+// SAFE HTML HELPERS
+// ===============================
+
 function escapeHtml(value) {
   return String(value ?? "")
     .replace(/&/g, "&amp;")
@@ -251,11 +324,17 @@ function safeUrl(value) {
   try {
     const parsed = new URL(url);
 
-    if (parsed.protocol === "https:" && parsed.hostname === "chat.whatsapp.com") {
+    if (
+      parsed.protocol === "https:" &&
+      parsed.hostname === "chat.whatsapp.com"
+    ) {
       return parsed.href;
     }
 
-    if (parsed.protocol === "https:" && parsed.hostname === "whatsapp.com") {
+    if (
+      parsed.protocol === "https:" &&
+      parsed.hostname === "whatsapp.com"
+    ) {
       return parsed.href;
     }
   } catch (_) {}
@@ -319,6 +398,7 @@ if (editVerifyForm) {
     document.getElementById("editNewMobile").value = r.igl_mobile || "";
 
     const editEmail = document.getElementById("editIglEmail");
+
     if (editEmail) {
       editEmail.value = r.igl_email || "";
       editEmail.readOnly = true;
@@ -354,22 +434,53 @@ if (editForm) {
     const result = document.getElementById("editResult");
 
     const rid = document.getElementById("editOriginalRid").value.trim();
+
     const originalMobile =
       document.getElementById("editOriginalMobile").value.trim();
-    const team = document.getElementById("editTeam").value.trim();
-    const igl = document.getElementById("editIgl").value.trim();
-    const iglUid = document.getElementById("editIglUid").value.trim();
-    const newMobile = document.getElementById("editNewMobile").value.trim();
-    const p2 = document.getElementById("editP2").value.trim();
-    const uid2 = document.getElementById("editUid2").value.trim();
-    const p3 = document.getElementById("editP3").value.trim();
-    const uid3 = document.getElementById("editUid3").value.trim();
-    const p4 = document.getElementById("editP4").value.trim();
-    const uid4 = document.getElementById("editUid4").value.trim();
+
+    const team =
+      document.getElementById("editTeam").value.trim();
+
+    const igl =
+      document.getElementById("editIgl").value.trim();
+
+    const iglUid =
+      document.getElementById("editIglUid").value.trim();
+
+    const newMobile =
+      document.getElementById("editNewMobile").value.trim();
+
+    const p2 =
+      document.getElementById("editP2").value.trim();
+
+    const uid2 =
+      document.getElementById("editUid2").value.trim();
+
+    const p3 =
+      document.getElementById("editP3").value.trim();
+
+    const uid3 =
+      document.getElementById("editUid3").value.trim();
+
+    const p4 =
+      document.getElementById("editP4").value.trim();
+
+    const uid4 =
+      document.getElementById("editUid4").value.trim();
 
     if (
-      !rid || !originalMobile || !team || !igl || !iglUid ||
-      !newMobile || !p2 || !uid2 || !p3 || !uid3 || !p4 || !uid4
+      !rid ||
+      !originalMobile ||
+      !team ||
+      !igl ||
+      !iglUid ||
+      !newMobile ||
+      !p2 ||
+      !uid2 ||
+      !p3 ||
+      !uid3 ||
+      !p4 ||
+      !uid4
     ) {
       result.textContent = "Please fill all fields.";
       return;
@@ -397,9 +508,11 @@ if (editForm) {
 
     if (error) {
       console.error(error);
+
       result.textContent =
         error.message ||
         "Unable to save changes. Please check your details.";
+
       return;
     }
 
@@ -419,5 +532,10 @@ if (editForm) {
       "</b>";
   });
 }
+
+
+// ===============================
+// START
+// ===============================
 
 boot();
