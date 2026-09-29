@@ -1735,8 +1735,7 @@ async function saveGroup() {
     max_slots: maxSlots,
     whatsapp_link: whatsappLink || null,
     instructions: instructions || null,
-    is_published: isPublished,
-    updated_at: new Date().toISOString()
+    is_published: isPublished
   };
 
   const button = document.getElementById("saveGroupBtn");
