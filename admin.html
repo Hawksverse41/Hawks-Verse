@@ -29,6 +29,65 @@ button{border:1px solid transparent;border-radius:11px;padding:12px 17px;cursor:
 .details{display:none;margin-top:18px;border:1px solid rgba(139,77,255,.24);border-radius:18px;padding:22px;background:radial-gradient(circle at 90% 0%,rgba(139,77,255,.1),transparent 35%),#0b0f16}.detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.detail-item{background:#090c12;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:13px}.detail-label{color:#7f8999;font-size:10px;margin-bottom:6px;text-transform:uppercase;letter-spacing:.8px}.detail-value{word-break:break-word}.empty{padding:40px 20px;text-align:center;color:var(--muted);border:1px dashed rgba(255,255,255,.09);border-radius:15px}.toast{position:fixed;right:22px;bottom:22px;background:#111722;border:1px solid rgba(246,200,74,.3);padding:14px 18px;border-radius:13px;box-shadow:0 18px 45px #0008;display:none;z-index:100}
 input[type=file]{padding:10px}input[type=checkbox]{width:17px;height:17px;accent-color:var(--gold)}
 @media(max-width:1000px){.stats{grid-template-columns:repeat(3,1fr)}}@media(max-width:760px){.wrap{padding:20px 14px 50px}.card{padding:18px;border-radius:17px}.stats{grid-template-columns:repeat(2,1fr)}.grid,.detail-grid{grid-template-columns:1fr}.filters{grid-template-columns:1fr}.actions button{flex:1}.topbar{align-items:flex-start}}@media(max-width:500px){.stats{grid-template-columns:1fr}.login-box{margin:45px auto;padding:23px}.brand{font-size:19px}.brand:before{width:38px;height:38px}}
+
+    /* ===== PREMIUM TOURNAMENT CARDS ===== */
+    .tournament-card{
+      display:grid;
+      grid-template-columns:110px minmax(0,1fr) auto;
+      gap:18px;
+      align-items:center;
+      padding:16px;
+      margin-bottom:14px;
+      background:linear-gradient(145deg,rgba(18,23,35,.96),rgba(8,11,18,.98));
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:18px;
+      box-shadow:0 14px 40px rgba(0,0,0,.18);
+      transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease;
+    }
+    .tournament-card:hover{
+      transform:translateY(-2px);
+      border-color:rgba(246,200,74,.32);
+      box-shadow:0 18px 48px rgba(0,0,0,.28);
+    }
+    .tournament-poster{
+      width:110px;height:145px;border-radius:12px;overflow:hidden;
+      background:#07090e;border:1px solid rgba(255,255,255,.08);
+      display:flex;align-items:center;justify-content:center;
+    }
+    .tournament-poster img{width:100%;height:100%;object-fit:cover;display:block}
+    .tournament-poster .no-poster{font-size:11px;color:#7f899a;text-align:center;padding:10px}
+    .tournament-main{min-width:0}
+    .tournament-title-row{
+      display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:7px
+    }
+    .tournament-title{font-size:17px;font-weight:900;letter-spacing:.2px}
+    .tournament-meta{
+      display:flex;gap:8px;flex-wrap:wrap;margin:9px 0 11px
+    }
+    .tournament-chip{
+      display:inline-flex;align-items:center;gap:5px;padding:6px 9px;
+      border-radius:999px;background:rgba(255,255,255,.045);
+      border:1px solid rgba(255,255,255,.07);color:#c7cfdd;font-size:11px;font-weight:800
+    }
+    .tournament-chip.gold{
+      color:#ffd968;border-color:rgba(246,200,74,.2);background:rgba(246,200,74,.08)
+    }
+    .tournament-chip.green{
+      color:#67e8a4;border-color:rgba(37,225,139,.18);background:rgba(37,225,139,.07)
+    }
+    .tournament-chip.red{
+      color:#ff929b;border-color:rgba(255,77,94,.18);background:rgba(255,77,94,.07)
+    }
+    .tournament-dates{font-size:12px;color:#8f99aa;line-height:1.5}
+    .tournament-actions{display:flex;align-items:center;gap:8px}
+    .tournament-actions button{min-width:82px}
+    @media(max-width:760px){
+      .tournament-card{grid-template-columns:78px minmax(0,1fr)}
+      .tournament-poster{width:78px;height:105px}
+      .tournament-actions{grid-column:1/-1}
+      .tournament-actions button{width:100%}
+    }
+
 </style>
 </head>
 
@@ -1008,48 +1067,69 @@ function renderTournaments() {
   const list = document.getElementById("tournamentList");
 
   if (!tournaments.length) {
-    list.innerHTML =
-      '<div class="empty">No tournaments found.</div>';
+    list.innerHTML = '<div class="empty">No tournaments found.</div>';
     return;
   }
 
-  list.innerHTML = tournaments.map(t => `
-    <div style="
-      border:1px solid #252d3a;
-      border-radius:10px;
-      padding:15px;
-      margin-bottom:12px;
-      background:#0c111a;
-    ">
-      <div style="
-        display:flex;
-        justify-content:space-between;
-        gap:12px;
-        flex-wrap:wrap;
-      ">
-        <div>
-          <strong>${escapeHtml(t.name)}</strong>
-          ${t.season
-            ? `<span class="muted"> — ${escapeHtml(t.season)}</span>`
-            : ""}
+  const statusLabel = {
+    upcoming: "UPCOMING",
+    ongoing: "ONGOING",
+    completed: "COMPLETED"
+  };
 
-          <div class="muted" style="margin-top:6px;">
-            ${escapeHtml(t.slug)}
-            · ₹${Number(t.prize_pool || 0).toLocaleString("en-IN")}
-            · ${escapeHtml(t.status)}
-            · ${t.is_published ? "Published" : "Unpublished"}
+  list.innerHTML = tournaments.map(t => {
+    const status = t.status || "upcoming";
+    const poster = t.poster_url
+      ? `<img src="${escapeHtml(t.poster_url)}" alt="${escapeHtml(t.name)} poster">`
+      : `<div class="no-poster">NO POSTER<br>UPLOADED</div>`;
+
+    const open = t.registration_open_at
+      ? new Date(t.registration_open_at).toLocaleString()
+      : "Not set";
+
+    const close = t.registration_close_at
+      ? new Date(t.registration_close_at).toLocaleString()
+      : "Not set";
+
+    const published = !!t.is_published;
+
+    return `
+      <div class="tournament-card">
+        <div class="tournament-poster">${poster}</div>
+
+        <div class="tournament-main">
+          <div class="tournament-title-row">
+            <div class="tournament-title">${escapeHtml(t.name)}</div>
+            ${t.season ? `<span class="status">${escapeHtml(t.season)}</span>` : ""}
+          </div>
+
+          <div class="tournament-meta">
+            <span class="tournament-chip gold">
+              ₹${Number(t.prize_pool || 0).toLocaleString("en-IN")} PRIZE
+            </span>
+            <span class="tournament-chip">${escapeHtml(t.max_squads || 0)} SQUADS</span>
+            <span class="tournament-chip">${escapeHtml(t.slug)}</span>
+            <span class="tournament-chip ${status === "ongoing" ? "green" : status === "completed" ? "red" : "gold"}">
+              ${statusLabel[status] || escapeHtml(status).toUpperCase()}
+            </span>
+            <span class="tournament-chip ${published ? "green" : "red"}">
+              ${published ? "PUBLISHED" : "UNPUBLISHED"}
+            </span>
+          </div>
+
+          <div class="tournament-dates">
+            Registration: <strong>${escapeHtml(open)}</strong>
+            &nbsp; → &nbsp;
+            <strong>${escapeHtml(close)}</strong>
           </div>
         </div>
 
-        <button
-          class="secondary"
-          onclick="editTournament('${t.id}')"
-        >
-          EDIT
-        </button>
+        <div class="tournament-actions">
+          <button class="secondary" onclick="editTournament('${t.id}')">EDIT</button>
+        </div>
       </div>
-    </div>
-  `).join("");
+    `;
+  }).join("");
 }
 
 function openTournamentForm() {
