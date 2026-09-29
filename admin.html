@@ -159,6 +159,8 @@ input[type=file]{padding:10px}input[type=checkbox]{width:17px;height:17px;accent
       display:inline-block;margin-top:10px;color:#ffd968;text-decoration:none;font-weight:800;font-size:12px;
     }
     .group-link:hover{text-decoration:underline}
+    .group-email-btn{margin-left:8px}
+    .group-email-status{margin-top:10px;font-size:12px;color:#aab3c2;line-height:1.5}
 
 </style>
 </head>
@@ -1641,8 +1643,10 @@ async function loadGroupsForTournament(tournamentId) {
 
         <div class="actions" style="margin-top:14px;">
           <button class="secondary" onclick="editGroup('${group.id}')">EDIT</button>
+          <button class="primary group-email-btn" id="send-email-${group.id}" onclick="sendGroupEmails('${group.id}')">SEND GROUP EMAILS</button>
           <button class="danger" onclick="deleteGroup('${group.id}')">DELETE</button>
         </div>
+        <div id="group-email-status-${group.id}" class="group-email-status"></div>
       </div>
     `;
   }).join("");
@@ -1674,6 +1678,100 @@ window.editGroup = async function(id) {
     behavior: "smooth",
     block: "center"
   });
+};
+
+window.sendGroupEmails = async function(id) {
+
+  const card = document.getElementById(`send-email-${id}`)?.closest(".group-card");
+  const groupName = card?.querySelector(".group-card-title")?.textContent?.trim() || "this group";
+  const statusEl = document.getElementById(`group-email-status-${id}`);
+
+  if (!confirm(
+    `Send the ${groupName} group WhatsApp link to all eligible IGL email addresses assigned to this group?`
+  )) {
+    return;
+  }
+
+  const button = document.getElementById(`send-email-${id}`);
+
+  if (button) {
+    button.disabled = true;
+    button.textContent = "SENDING...";
+  }
+
+  if (statusEl) {
+    statusEl.textContent = "Sending group emails...";
+  }
+
+  try {
+    const { data, error } = await client.functions.invoke(
+      "send-group-email",
+      {
+        body: {
+          group_id: id
+        }
+      }
+    );
+
+    if (error) {
+      console.error("Group email error:", error);
+
+      if (statusEl) {
+        statusEl.textContent =
+          `Email sending failed: ${error.message || "Unknown error"}`;
+      }
+
+      alert(
+        "Group email sending failed.\n\n" +
+        (error.message || "Unknown error")
+      );
+
+      return;
+    }
+
+    const sent = Number(data?.sent || 0);
+    const failed = Number(data?.failed || 0);
+    const total = Number(data?.total_eligible || 0);
+
+    if (statusEl) {
+      statusEl.textContent =
+        `Email result: ${sent} sent, ${failed} failed, ${total} eligible.`;
+    }
+
+    if (failed > 0) {
+      const failures = (data?.results || [])
+        .filter(item => !item.success)
+        .map(item =>
+          `${item.registration_id || "?"}: ${item.error || "Failed"}`
+        )
+        .join("\n");
+
+      alert(
+        `Email sending finished.\n\nSent: ${sent}\nFailed: ${failed}\nEligible: ${total}\n\n` +
+        (failures || "Some emails failed to send.")
+      );
+    } else {
+      showToast(`${sent} group email(s) sent successfully.`);
+    }
+
+  } catch (err) {
+    console.error("Group email exception:", err);
+
+    if (statusEl) {
+      statusEl.textContent =
+        "Email sending failed. Please try again.";
+    }
+
+    alert(
+      "Email sending failed.\n\n" +
+      (err?.message || "Unexpected error")
+    );
+  } finally {
+    if (button) {
+      button.disabled = false;
+      button.textContent = "SEND GROUP EMAILS";
+    }
+  }
 };
 
 window.deleteGroup = async function(id) {
