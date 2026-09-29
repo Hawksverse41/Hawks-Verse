@@ -88,6 +88,51 @@ input[type=file]{padding:10px}input[type=checkbox]{width:17px;height:17px;accent
       .tournament-actions button{width:100%}
     }
 
+
+    /* ===== PREMIUM GROUP MANAGEMENT ===== */
+    .group-panel{
+      background:linear-gradient(145deg,rgba(18,23,35,.96),rgba(8,11,18,.98));
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:18px;
+      padding:18px;
+    }
+    .group-header{
+      display:flex;align-items:center;justify-content:space-between;
+      gap:14px;flex-wrap:wrap;margin-bottom:18px
+    }
+    .group-kicker{
+      color:#f6c84a;font-size:11px;font-weight:900;
+      letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px
+    }
+    .group-form{
+      padding:16px;border-radius:15px;
+      background:rgba(255,255,255,.025);
+      border:1px solid rgba(255,255,255,.07)
+    }
+    .group-form-grid{
+      display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px
+    }
+    .group-form-grid .full{grid-column:1/-1}
+    .group-save-row{
+      display:flex;align-items:center;justify-content:space-between;
+      gap:12px;flex-wrap:wrap;margin-top:15px
+    }
+    .publish-pill{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:8px 11px;border-radius:999px;
+      background:rgba(246,200,74,.07);
+      border:1px solid rgba(246,200,74,.16);
+      color:#e9edf5;font-size:12px;font-weight:800
+    }
+    .group-list-box{
+      margin-top:18px;padding:16px;border-radius:15px;
+      background:#080b12;border:1px solid rgba(255,255,255,.07)
+    }
+    @media(max-width:760px){
+      .group-form-grid{grid-template-columns:1fr}
+      .group-form-grid .full{grid-column:auto}
+    }
+
 </style>
 </head>
 
@@ -268,62 +313,70 @@ input[type=file]{padding:10px}input[type=checkbox]{width:17px;height:17px;accent
 
 <!-- GROUP MANAGEMENT -->
 <div class="card" style="margin-top:20px;">
-  <div class="topbar">
-    <div>
-      <h2>Groups</h2>
-      <div class="muted">Manage tournament groups</div>
+  <div class="group-panel">
+
+    <div class="group-header">
+      <div>
+        <div class="group-kicker">TOURNAMENT OPERATIONS</div>
+        <h2 style="margin-bottom:4px;">Groups</h2>
+        <div class="muted">Prepare tournament groups and WhatsApp access.</div>
+      </div>
+      <span class="status">GROUP MANAGEMENT</span>
     </div>
-  </div>
 
-  <div class="grid">
+    <div class="group-form">
+      <div class="group-form-grid">
 
-    <label>
-      Tournament
-      <select id="groupTournament">
-        <option value="">Select tournament</option>
-      </select>
-    </label>
+        <label>
+          Tournament
+          <select id="groupTournament">
+            <option value="">Select tournament</option>
+          </select>
+        </label>
 
-    <label>
-      Group Name
-      <input id="groupName" type="text" placeholder="Group A">
-    </label>
+        <label>
+          Group Name
+          <input id="groupName" type="text" placeholder="Group A">
+        </label>
 
-    <label>
-      Group Number
-      <input id="groupNumber" type="number" min="1" value="1">
-    </label>
+        <label>
+          Group Number
+          <input id="groupNumber" type="number" min="1" value="1">
+        </label>
 
-    <label>
-      Max Slots
-      <input id="groupSlots" type="number" min="1" value="12">
-    </label>
+        <label>
+          Max Slots
+          <input id="groupSlots" type="number" min="1" value="12">
+        </label>
 
-    <label style="grid-column:1/-1;">
-      WhatsApp Group Link
-      <input id="groupWhatsapp" type="text"
-        placeholder="https://chat.whatsapp.com/...">
-    </label>
+        <label class="full">
+          WhatsApp Group Link
+          <input id="groupWhatsapp" type="text"
+            placeholder="https://chat.whatsapp.com/...">
+        </label>
 
-    <label style="grid-column:1/-1;">
-      Instructions
-      <textarea id="groupInstructions" rows="3"
-        placeholder="Join the WhatsApp group using the link above..."></textarea>
-    </label>
+        <label class="full">
+          Instructions
+          <textarea id="groupInstructions" rows="3"
+            placeholder="Join the WhatsApp group using the link above..."></textarea>
+        </label>
 
-    <label style="display:flex;align-items:center;gap:8px;">
-      <input id="groupPublished" type="checkbox">
-      Publish group
-    </label>
+      </div>
 
-  </div>
+      <div class="group-save-row">
+        <label class="publish-pill">
+          <input id="groupPublished" type="checkbox">
+          Publish group
+        </label>
 
-  <div style="margin-top:15px;">
-    <button id="saveGroupBtn">SAVE GROUP</button>
-  </div>
+        <button id="saveGroupBtn" class="primary">SAVE GROUP</button>
+      </div>
+    </div>
 
-  <div id="groupList" style="margin-top:20px;">
-    <div class="muted">Select a tournament to view groups.</div>
+    <div id="groupList" class="group-list-box">
+      <div class="muted">Select a tournament to view groups.</div>
+    </div>
+
   </div>
 </div>
 
