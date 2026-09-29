@@ -347,8 +347,8 @@
         <small>REGISTRATION MANAGEMENT</small>
         <h2>CHECK YOUR <em>REGISTRATION.</em></h2>
         <p>
-          View your registration details and status using your
-          Registration ID.
+          Verify your registration using your Registration ID
+          and IGL Mobile Number.
         </p>
       </div>
     </div>
@@ -360,13 +360,25 @@
         <label>REGISTRATION ID</label>
         <input
           id="rid"
+          type="text"
           placeholder="HV-FM-001"
           required
         >
       </div>
 
+      <div>
+        <label>IGL MOBILE NUMBER</label>
+        <input
+          id="checkMobile"
+          type="tel"
+          inputmode="numeric"
+          placeholder="Enter IGL mobile number"
+          required
+        >
+      </div>
+
       <button class="btn primary" type="submit">
-        CHECK REGISTRATION →
+        VERIFY & CHECK →
       </button>
 
     </form>
@@ -599,7 +611,8 @@
         <span>+</span>
       </summary>
       <p>
-        Enter your Registration ID in the Registration Management section.
+        Enter your Registration ID and IGL Mobile Number in the
+        Registration Management section.
       </p>
     </details>
 
