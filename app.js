@@ -13,36 +13,56 @@ async function boot() {
   try {
     db = supabase.createClient(C.supabaseUrl, C.supabasePublishableKey);
 
-    const r = await db
+    let tournamentQuery = db
       .from("tournaments")
       .select("*")
-      .eq("is_published", true)
-      .eq(
-  "tournament_type",
-  window.HAWKS_REGISTRATION_TYPE || "squad"
-)
+      .eq("is_published", true);
+
+    /*
+      Homepage:
+      - No HAWKS_REGISTRATION_TYPE set
+      - Loads latest published tournament of any type
+
+      Squad registration page:
+      - HAWKS_REGISTRATION_TYPE = "squad"
+      - Loads latest published Squad tournament
+
+      Solo registration page:
+      - HAWKS_REGISTRATION_TYPE = "solo"
+      - Loads latest published Solo tournament
+    */
+    if (window.HAWKS_REGISTRATION_TYPE) {
+      tournamentQuery = tournamentQuery.eq(
+        "tournament_type",
+        window.HAWKS_REGISTRATION_TYPE
+      );
+    }
+
+    const r = await tournamentQuery
       .order("created_at", { ascending: false });
 
     if (r.error) throw r.error;
 
-   t = r.data?.[0];
-      if (!t) throw new Error("Tournament unavailable");
+    t = r.data?.[0];
+
+    if (!t) {
+      throw new Error("Tournament unavailable");
+    }
+
     const registerUrl =
-  t.tournament_type === "solo"
-    ? "register-solo.html"
-    : "register.html";
+      t.tournament_type === "solo"
+        ? "register-solo.html"
+        : "register.html";
 
-document
-  .querySelectorAll(
-    'a[href="register.html"], a[href="#register"], a.round-arrow'
-  )
-  .forEach(link => {
-    link.href = registerUrl;
-    link.target = "_blank";
-    link.rel = "noopener";
-  });
-
-   
+    document
+      .querySelectorAll(
+        'a[href="register.html"], a[href="#register"], a.round-arrow'
+      )
+      .forEach(link => {
+        link.href = registerUrl;
+        link.target = "_blank";
+        link.rel = "noopener";
+      });
 
     const poster = t.poster_url || "assets/weekly-wars-s2.png";
 
@@ -317,7 +337,9 @@ if (checkForm) {
       $("checkResult").innerHTML =
         "Team: <b>" + escapeHtml(x.team_name || "") + "</b><br>" +
         "Status: <b>" + escapeHtml(status) + "</b><br>" +
-        "Registration ID: <b>" + escapeHtml(x.registration_id || registrationId) + "</b>" +
+        "Registration ID: <b>" +
+        escapeHtml(x.registration_id || registrationId) +
+        "</b>" +
         groupHtml;
     }
   };
