@@ -20,30 +20,39 @@ async function boot() {
 
     /*
       Homepage:
-      - No HAWKS_REGISTRATION_TYPE set
-      - Loads latest published tournament of any type
+      - Prefer ONGOING tournament
+      - If no ONGOING tournament, use UPCOMING tournament
 
       Squad registration page:
       - HAWKS_REGISTRATION_TYPE = "squad"
-      - Loads latest published Squad tournament
 
       Solo registration page:
       - HAWKS_REGISTRATION_TYPE = "solo"
-      - Loads latest published Solo tournament
     */
+
     if (window.HAWKS_REGISTRATION_TYPE) {
       tournamentQuery = tournamentQuery.eq(
         "tournament_type",
         window.HAWKS_REGISTRATION_TYPE
       );
+
+      // Registration pages: latest tournament of their selected type
+      tournamentQuery = tournamentQuery.order("created_at", {
+        ascending: false
+      });
+    } else {
+      // Homepage:
+      // ONGOING always gets priority over UPCOMING
+      tournamentQuery = tournamentQuery.order("status", {
+        ascending: true
+      });
+
+      tournamentQuery = tournamentQuery.order("created_at", {
+        ascending: false
+      });
     }
 
-    const r = await tournamentQuery
-      .order("created_at", { ascending: false });
-
-    if (r.error) throw r.error;
-
-    t = r.data?.[0];
+    const r = await tournamentQuery;
 
     if (!t) {
       throw new Error("Tournament unavailable");
