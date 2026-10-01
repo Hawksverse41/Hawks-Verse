@@ -82,15 +82,28 @@ async function boot() {
         ? "register-solo.html"
         : "register.html";
 
-    document
-      .querySelectorAll(
-        'a[href="register.html"], a[href="#register"], a.round-arrow'
-      )
-      .forEach(link => {
-        link.href = registerUrl;
-        link.target = "_blank";
-        link.rel = "noopener";
-      });
+      const registerLinks = document.querySelectorAll(
+      'a[href="register.html"], a[href="#register"], a.round-arrow'
+    );
+
+    registerLinks.forEach(link => {
+      link.href = registerUrl;
+      link.target = "_blank";
+      link.rel = "noopener";
+
+      // Homepage:
+      // ONGOING = registration button visible
+      // UPCOMING = registration button hidden
+      if (!window.HAWKS_REGISTRATION_TYPE) {
+        const status = String(t.status || "").toUpperCase();
+
+        if (status === "UPCOMING") {
+          link.style.display = "none";
+        } else {
+          link.style.display = "";
+        }
+      }
+    });
 
     const poster =
       t.poster_url || "assets/weekly-wars-s2.png";
