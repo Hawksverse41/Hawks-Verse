@@ -1425,6 +1425,50 @@ window.deleteTournament = async function(id) {
   }
 
   const confirmed = confirm(
+    "DELETE TOURNAMENT?\n\n" +
+    tournament.name +
+    "\n\nThis will permanently delete the tournament, its registrations, groups, and group assignments.\n\n" +
+    "This action cannot be undone."
+  );
+
+  if (!confirmed) return;
+
+  const { error } = await client.rpc(
+    "delete_tournament",
+    {
+      p_tournament_id: id
+    }
+  );
+
+  if (error) {
+    console.error("Delete tournament error:", error);
+    document.getElementById("tournamentMessage").textContent =
+      "Delete failed: " + error.message;
+    return;
+  }
+
+  document.getElementById("tournamentMessage").textContent =
+    "Tournament deleted successfully.";
+
+  showToast("Tournament deleted successfully.");
+
+  if (editingTournamentId === id) {
+    editingTournamentId = null;
+    document.getElementById("tournamentForm").style.display = "none";
+  }
+
+  await loadTournaments();
+  await loadRegistrations();
+  fillGroupTournamentSelect();
+};
+  const tournament = tournaments.find(t => t.id === id);
+
+  if (!tournament) {
+    alert("Tournament not found.");
+    return;
+  }
+
+  const confirmed = confirm(
     `DELETE TOURNAMENT?\n\n${tournament.name}\n\n` +
     `This will permanently delete the tournament, its registrations, groups, ` +
     `and group assignments.\n\nThis action cannot be undone.`
