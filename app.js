@@ -26,6 +26,20 @@ async function boot() {
     if (r.error) throw r.error;
 
     t = r.data?.[0];
+    const registerUrl =
+  t.tournament_type === "solo"
+    ? "register-solo.html"
+    : "register.html";
+
+document
+  .querySelectorAll(
+    'a[href="register.html"], a[href="#register"], a.round-arrow'
+  )
+  .forEach(link => {
+    link.href = registerUrl;
+    link.target = "_blank";
+    link.rel = "noopener";
+  });
 
     if (!t) throw new Error("Tournament unavailable");
 
