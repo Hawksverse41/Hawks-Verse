@@ -1,0 +1,630 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Solo Registration | HAWKS VERSE</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link
+  href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@500;600;700;800;900&display=swap"
+  rel="stylesheet"
+>
+
+<link rel="stylesheet" href="styles.css">
+
+<style>
+  .register-page {
+    min-height: 100vh;
+  }
+
+  .register-topbar {
+    width: min(1180px, calc(100% - 32px));
+    margin: 0 auto;
+    padding: 18px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .register-back {
+    text-decoration: none;
+    color: inherit;
+    opacity: .85;
+    font-weight: 700;
+    letter-spacing: .02em;
+  }
+
+  .register-wrap {
+    width: min(980px, calc(100% - 24px));
+    margin: 0 auto;
+    padding: 32px 0 70px;
+  }
+
+  .register-intro {
+    margin-bottom: 20px;
+  }
+
+  .register-intro small {
+    opacity: .75;
+  }
+
+  .register-intro h1 {
+    margin: 8px 0 10px;
+  }
+
+  .register-intro p {
+    margin: 0;
+    max-width: 720px;
+    opacity: .78;
+  }
+
+  .register-shell {
+    background: rgba(255,255,255,.035);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 18px;
+    padding: 20px;
+  }
+
+  .register-shell .db-status {
+    margin-bottom: 18px;
+  }
+
+  .register-section-title {
+    margin: 18px 0 12px;
+    font-family: Orbitron, sans-serif;
+    font-size: .88rem;
+    letter-spacing: .08em;
+    opacity: .85;
+  }
+
+  .register-note {
+    margin: 14px 0 20px;
+    padding: 12px 14px;
+    border-left: 2px solid #d7b65c;
+    background: rgba(215,182,92,.07);
+    border-radius: 8px;
+    font-size: .92rem;
+    opacity: .88;
+  }
+
+  .register-submit {
+    width: 100%;
+    margin-top: 8px;
+  }
+
+  #result {
+    margin-top: 16px;
+    padding: 14px 16px;
+    border-radius: 10px;
+    background: rgba(215,182,92,.08);
+    line-height: 1.6;
+  }
+
+  #result:empty {
+    display: none;
+  }
+
+  .solo-success {
+    color: inherit;
+  }
+
+  .solo-error {
+    color: #ff7d7d;
+  }
+
+  @media (max-width: 700px) {
+    .register-topbar {
+      width: min(100% - 20px, 1180px);
+    }
+
+    .register-wrap {
+      width: min(100% - 16px, 980px);
+      padding-top: 18px;
+    }
+
+    .register-shell {
+      padding: 15px;
+      border-radius: 14px;
+    }
+
+    .register-intro h1 {
+      font-size: 2rem;
+      line-height: 1.05;
+    }
+
+    .register-back {
+      font-size: .9rem;
+    }
+  }
+</style>
+</head>
+
+<body class="register-page">
+
+<header class="register-topbar">
+
+  <a class="logo" href="index.html">
+    <img
+      src="assets/hawks-verse-logo.png"
+      alt="HAWKS VERSE"
+    >
+    <span>HAWKS <b>VERSE</b></span>
+  </a>
+
+  <a class="register-back" href="index.html">
+    ← BACK TO HOME
+  </a>
+
+</header>
+
+
+<main class="register-wrap">
+
+  <div class="register-intro">
+
+    <small>SOLO TOURNAMENT REGISTRATION</small>
+
+    <h1>
+      REGISTER AS A <em>PLAYER.</em>
+    </h1>
+
+    <p>
+      Enter your Free Fire MAX player details correctly.
+      Registration is free.
+    </p>
+
+  </div>
+
+
+  <div class="register-shell">
+
+    <div id="dbStatus" class="db-status">
+      Connecting to database...
+    </div>
+
+
+    <div class="register-note">
+
+      <strong id="formTitle">
+        Current Solo Tournament
+      </strong>
+
+      <br>
+
+      Register with your own Player Name, UID,
+      Mobile Number and Email.
+
+    </div>
+
+
+    <form id="soloReg">
+
+      <input
+        type="hidden"
+        id="tid"
+      >
+
+
+      <div class="register-section-title">
+        PLAYER DETAILS
+      </div>
+
+
+      <div class="form-grid">
+
+        <input
+          id="playerName"
+          type="text"
+          placeholder="Player Name"
+          required
+        >
+
+        <input
+          id="uid"
+          type="text"
+          placeholder="UID"
+          required
+        >
+
+        <input
+          id="mobile"
+          type="tel"
+          inputmode="numeric"
+          placeholder="Mobile Number"
+          required
+        >
+
+        <input
+          id="email"
+          type="email"
+          placeholder="Email Address"
+          required
+        >
+
+      </div>
+
+
+      <label class="consent">
+
+        <input
+          type="checkbox"
+          id="consent"
+          required
+        >
+
+        <span>
+          I confirm that the information submitted is correct
+          and may be used for tournament verification.
+        </span>
+
+      </label>
+
+
+      <button
+        class="btn primary form-submit register-submit"
+        type="submit"
+        id="submitBtn"
+      >
+        SUBMIT REGISTRATION
+        <span>→</span>
+      </button>
+
+    </form>
+
+
+    <div
+      id="result"
+      aria-live="polite"
+    ></div>
+
+  </div>
+
+</main>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+
+<script>
+
+const C = window.HAWKS_CONFIG || {};
+
+let db = null;
+let tournament = null;
+
+const $ = id => document.getElementById(id);
+
+
+/* =========================================================
+   ESCAPE HTML
+========================================================= */
+
+function escapeHtml(value) {
+
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+
+}
+
+
+/* =========================================================
+   LOAD SOLO TOURNAMENT
+========================================================= */
+
+async function loadSoloTournament() {
+
+  if (!C.supabaseUrl || !C.supabasePublishableKey) {
+
+    $("dbStatus").textContent =
+      "Database configuration missing.";
+
+    $("dbStatus").className =
+      "db-status error";
+
+    return;
+
+  }
+
+
+  try {
+
+    db = supabase.createClient(
+      C.supabaseUrl,
+      C.supabasePublishableKey
+    );
+
+
+    const result = await db
+      .from("tournaments")
+      .select("*")
+      .eq("tournament_type", "solo")
+      .eq("is_published", true)
+      .eq("status", "ongoing")
+      .order("created_at", {
+        ascending: false
+      })
+      .limit(1);
+
+
+    if (result.error) {
+      throw result.error;
+    }
+
+
+    tournament = result.data?.[0];
+
+
+    if (!tournament) {
+
+      $("dbStatus").textContent =
+        "No Solo tournament is currently open for registration.";
+
+      $("dbStatus").className =
+        "db-status error";
+
+      $("soloReg").style.display = "none";
+
+      return;
+
+    }
+
+
+    $("tid").value = tournament.id;
+
+
+    $("formTitle").textContent =
+      tournament.name || "Solo Tournament";
+
+
+    $("dbStatus").textContent =
+      "✓ Solo registration ready.";
+
+    $("dbStatus").className =
+      "db-status ok";
+
+
+  } catch (error) {
+
+    console.error(
+      "HAWKS VERSE SOLO:",
+      error
+    );
+
+    $("dbStatus").textContent =
+      "Database connection failed. Please try again.";
+
+    $("dbStatus").className =
+      "db-status error";
+
+    $("soloReg").style.display = "none";
+
+  }
+
+}
+
+
+/* =========================================================
+   SOLO REGISTRATION
+========================================================= */
+
+$("soloReg").addEventListener(
+  "submit",
+  async event => {
+
+    event.preventDefault();
+
+
+    if (!db || !tournament) {
+
+      alert(
+        "Solo tournament is not available right now."
+      );
+
+      return;
+
+    }
+
+
+    const playerName =
+      $("playerName").value.trim();
+
+    const uid =
+      $("uid").value.trim();
+
+    const mobile =
+      $("mobile").value.trim();
+
+    const email =
+      $("email").value.trim();
+
+
+    if (
+      !playerName ||
+      !uid ||
+      !mobile ||
+      !email
+    ) {
+
+      alert(
+        "Please fill all required fields."
+      );
+
+      return;
+
+    }
+
+
+    const button =
+      $("submitBtn");
+
+
+    button.disabled = true;
+
+    button.innerHTML =
+      "SUBMITTING...";
+
+
+    $("result").className = "";
+    $("result").innerHTML =
+      "Submitting your Solo registration...";
+
+
+    try {
+
+      const response =
+        await db.rpc(
+          "create_solo_registration",
+          {
+            p_tournament_id:
+              tournament.id,
+
+            p_player_name:
+              playerName,
+
+            p_uid:
+              uid,
+
+            p_mobile:
+              mobile,
+
+            p_email:
+              email
+          }
+        );
+
+
+      if (response.error) {
+
+        console.error(
+          "Solo registration error:",
+          response.error
+        );
+
+        $("result").className =
+          "solo-error";
+
+        $("result").innerHTML =
+          escapeHtml(
+            response.error.message ||
+            "Registration failed."
+          );
+
+        return;
+
+      }
+
+
+      const row =
+        Array.isArray(response.data)
+          ? response.data[0]
+          : response.data;
+
+
+      if (!row || !row.registration_id) {
+
+        $("result").className =
+          "solo-error";
+
+        $("result").textContent =
+          "Registration created, but Registration ID could not be read.";
+
+        return;
+
+      }
+
+
+      $("result").className =
+        "solo-success";
+
+      $("result").innerHTML = `
+
+        <strong>
+          REGISTRATION SUCCESSFUL
+        </strong>
+
+        <br>
+
+        Player:
+        <strong>
+          ${escapeHtml(
+            row.solo_player_name ||
+            playerName
+          )}
+        </strong>
+
+        <br>
+
+        Registration ID:
+        <strong>
+          ${escapeHtml(
+            row.registration_id
+          )}
+        </strong>
+
+        <br>
+
+        Status:
+        <strong>
+          ${escapeHtml(
+            row.status || "registered"
+          )}
+        </strong>
+
+        <br><br>
+
+        Save this Registration ID for
+        checking your registration later.
+
+      `;
+
+
+      $("soloReg").reset();
+
+      $("tid").value =
+        tournament.id;
+
+
+    } catch (error) {
+
+      console.error(
+        "Solo registration:",
+        error
+      );
+
+      $("result").className =
+        "solo-error";
+
+      $("result").textContent =
+        error.message ||
+        "Registration failed.";
+
+    } finally {
+
+      button.disabled = false;
+
+      button.innerHTML =
+        'SUBMIT REGISTRATION <span>→</span>';
+
+    }
+
+  }
+);
+
+
+/* =========================================================
+   START
+========================================================= */
+
+loadSoloTournament();
+
+</script>
+
+</body>
+</html>
