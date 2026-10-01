@@ -19,7 +19,7 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.18;ba
 h1,h2,h3{font-family:Orbitron,Inter,sans-serif;letter-spacing:.4px}h1{font-size:30px;margin:0 0 8px}h2{font-size:21px;margin:0 0 6px}p{line-height:1.55}.muted{color:var(--muted)}
 input,select,textarea,button{font:inherit}input,select,textarea{width:100%;background:#07090e;color:var(--text);border:1px solid rgba(255,255,255,.11);border-radius:11px;padding:13px;outline:none;transition:.2s}input:focus,select:focus,textarea:focus{border-color:rgba(246,200,74,.6);box-shadow:0 0 0 3px rgba(246,200,74,.08)}textarea{min-height:95px;resize:vertical}
 button{border:1px solid transparent;border-radius:11px;padding:12px 17px;cursor:pointer;font-weight:800;letter-spacing:.3px;background:linear-gradient(135deg,var(--gold2),var(--gold));color:#08090c;transition:.18s}button:hover{transform:translateY(-1px);filter:brightness(1.05)}.primary{background:linear-gradient(135deg,var(--gold2),var(--gold));color:#08090c}.secondary{background:#171c27;border-color:rgba(255,255,255,.1);color:#fff}.danger{background:rgba(255,77,94,.1);border-color:rgba(255,77,94,.28);color:#ff929c}.actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-.login-box{max-width:560px;margin:90px auto;padding:34px}.login-box:after{content:"ADMIN";position:absolute;right:-20px;top:30px;font:900 75px Orbitron;color:rgba(246,200,74,.025);transform:rotate(-8deg)}label{display:block;margin:15px 0 8px;color:#c9ced8;font-size:13px;font-weight:700}.message{margin-top:12px;color:#ff6670}
+#adminPanel{display:none}.login-box{max-width:560px;margin:90px auto;padding:34px}.login-box:after{content:"ADMIN";position:absolute;right:-20px;top:30px;font:900 75px Orbitron;color:rgba(246,200,74,.025);transform:rotate(-8deg)}label{display:block;margin:15px 0 8px;color:#c9ced8;font-size:13px;font-weight:700}.message{margin-top:12px;color:#ff6670}
 .topbar{display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap}.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:13px;margin-bottom:20px}.stat{position:relative;min-height:112px;background:linear-gradient(145deg,#111620,#0a0d13);border:1px solid var(--line);border-radius:17px;padding:18px;overflow:hidden}.stat:after{content:"";position:absolute;width:85px;height:85px;right:-30px;bottom:-35px;border-radius:50%;background:rgba(246,200,74,.08)}.stat .muted{font-size:11px;text-transform:uppercase;letter-spacing:.8px}.stat-value{font:900 31px Orbitron;margin-top:10px}
 .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 18px}#tournamentForm{background:rgba(255,255,255,.018);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:20px;margin-top:18px}
 #tournamentList>div{border:1px solid rgba(255,255,255,.08)!important;border-radius:16px!important;padding:18px 20px!important;margin-bottom:12px!important;background:linear-gradient(145deg,#111620,#0a0d13)!important}#tournamentList>div:hover{border-color:rgba(246,200,74,.3)!important}
@@ -1332,6 +1332,7 @@ function renderTournaments() {
 
         <div class="tournament-actions">
           <button class="secondary" onclick="editTournament('${t.id}')">EDIT</button>
+          <button class="danger" onclick="deleteTournament('${t.id}')">DELETE</button>
         </div>
       </div>
     `;
@@ -1413,6 +1414,110 @@ window.editTournament = function(id) {
       behavior: "smooth",
       block: "start"
     });
+};
+
+window.deleteTournament = async function(id) {
+  const tournament = tournaments.find(t => t.id === id);
+
+  if (!tournament) {
+    alert("Tournament not found.");
+    return;
+  }
+
+  const confirmed = confirm(
+    `DELETE TOURNAMENT?\n\n${tournament.name}\n\n` +
+    `This will permanently delete the tournament, its registrations, groups, ` +
+    `and group assignments.\n\nThis action cannot be undone.`
+  );
+
+  if (!confirmed) return;
+
+  const message = document.getElementById("tournamentMessage");
+  message.textContent = "Deleting tournament...";
+
+  // First get all groups belonging to this tournament.
+  const { data: groups, error: groupLoadError } = await client
+    .from("tournament_groups")
+    .select("id")
+    .eq("tournament_id", id);
+
+  if (groupLoadError) {
+    console.error("Tournament group lookup failed:", groupLoadError);
+    message.textContent = "Delete failed: " + groupLoadError.message;
+    return;
+  }
+
+  const groupIds = (groups || []).map(g => g.id);
+
+  // Remove group assignments before removing groups.
+  if (groupIds.length) {
+    const { error: assignmentDeleteError } = await client
+      .from("tournament_group_assignments")
+      .delete()
+      .in("group_id", groupIds);
+
+    if (assignmentDeleteError) {
+      console.error("Tournament assignment delete failed:", assignmentDeleteError);
+      message.textContent = "Delete failed: " + assignmentDeleteError.message;
+      return;
+    }
+  }
+
+  // Remove groups belonging to the tournament.
+  const { error: groupDeleteError } = await client
+    .from("tournament_groups")
+    .delete()
+    .eq("tournament_id", id);
+
+  if (groupDeleteError) {
+    console.error("Tournament group delete failed:", groupDeleteError);
+    message.textContent = "Delete failed: " + groupDeleteError.message;
+    return;
+  }
+
+  // Remove registrations belonging to the tournament.
+  const { error: registrationDeleteError } = await client
+    .from("registrations")
+    .delete()
+    .eq("tournament_id", id);
+
+  if (registrationDeleteError) {
+    console.error("Tournament registration delete failed:", registrationDeleteError);
+    message.textContent = "Delete failed: " + registrationDeleteError.message;
+    return;
+  }
+
+  // Finally remove the tournament itself.
+  const { error: tournamentDeleteError } = await client
+    .from("tournaments")
+    .delete()
+    .eq("id", id);
+
+  if (tournamentDeleteError) {
+    console.error("Tournament delete failed:", tournamentDeleteError);
+    message.textContent = "Delete failed: " + tournamentDeleteError.message;
+    return;
+  }
+
+  if (editingTournamentId === id) {
+    editingTournamentId = null;
+    document.getElementById("tournamentForm").style.display = "none";
+  }
+
+  const groupSelect = document.getElementById("groupTournament");
+  if (groupSelect) {
+    groupSelect.value = "";
+  }
+
+  resetGroupForm();
+  document.getElementById("groupList").innerHTML =
+    '<div class="muted">Select a tournament to view groups.</div>';
+
+  message.textContent = "Tournament deleted successfully.";
+  showToast("Tournament deleted successfully.");
+
+  await loadTournaments();
+  await loadRegistrations();
 };
 
 function toDatetimeLocal(value) {
