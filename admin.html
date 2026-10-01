@@ -1384,6 +1384,8 @@ window.editTournament = function(id) {
   document.getElementById("tPrize").value = t.prize_pool || 0;
   document.getElementById("tStatus").value =
     t.status || "upcoming";
+  document.getElementById("tType").value =
+  t.tournament_type || "squad";
   document.getElementById("tMaxSquads").value =
     t.max_squads || 48;
 
