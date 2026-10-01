@@ -17,6 +17,10 @@ async function boot() {
       .from("tournaments")
       .select("*")
       .eq("is_published", true)
+      .eq(
+  "tournament_type",
+  window.HAWKS_REGISTRATION_TYPE || "squad"
+)
       .order("created_at", { ascending: false });
 
     if (r.error) throw r.error;
