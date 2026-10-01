@@ -13,21 +13,19 @@ async function boot() {
   try {
     db = supabase.createClient(C.supabaseUrl, C.supabasePublishableKey);
 
-    let tournamentQuery = db
+       let tournamentQuery = db
       .from("tournaments")
       .select("*")
       .eq("is_published", true);
 
     /*
+      Registration pages:
+      - Only load their selected tournament type
+
       Homepage:
-      - Prefer ONGOING tournament
-      - If no ONGOING tournament, use UPCOMING tournament
-
-      Squad registration page:
-      - HAWKS_REGISTRATION_TYPE = "squad"
-
-      Solo registration page:
-      - HAWKS_REGISTRATION_TYPE = "solo"
+      - ONGOING tournament gets priority
+      - If no ONGOING, use UPCOMING
+      - If neither exists, use latest published tournament
     */
 
     if (window.HAWKS_REGISTRATION_TYPE) {
@@ -35,25 +33,38 @@ async function boot() {
         "tournament_type",
         window.HAWKS_REGISTRATION_TYPE
       );
-
-      // Registration pages: latest tournament of their selected type
-      tournamentQuery = tournamentQuery.order("created_at", {
-        ascending: false
-      });
-    } else {
-      // Homepage:
-      // ONGOING always gets priority over UPCOMING
-      tournamentQuery = tournamentQuery.order("status", {
-        ascending: true
-      });
-
-      tournamentQuery = tournamentQuery.order("created_at", {
-        ascending: false
-      });
     }
 
-    const r = await tournamentQuery;
+    const r = await tournamentQuery.order("created_at", {
+      ascending: false
+    });
 
+    if (r.error) throw r.error;
+
+    if (window.HAWKS_REGISTRATION_TYPE) {
+      // Registration page: latest tournament of selected type
+      t = r.data?.[0];
+    } else {
+      // Homepage: ONGOING first, then UPCOMING
+      const ongoingTournament = r.data?.find(
+        tournament =>
+          String(tournament.status || "").toUpperCase() === "ONGOING"
+      );
+
+      const upcomingTournament = r.data?.find(
+        tournament =>
+          String(tournament.status || "").toUpperCase() === "UPCOMING"
+      );
+
+      t =
+        ongoingTournament ||
+        upcomingTournament ||
+        r.data?.[0];
+    }
+
+    if (!t) {
+      throw new Error("Tournament unavailable");
+    }
     if (!t) {
       throw new Error("Tournament unavailable");
     }
