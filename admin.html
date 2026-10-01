@@ -1452,6 +1452,8 @@ async function saveTournament() {
   const payload = {
     name,
     slug,
+    tournament_type:
+  document.getElementById("tType").value,
     season:
       document.getElementById("tSeason").value.trim() || null,
 
