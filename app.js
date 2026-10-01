@@ -25,7 +25,8 @@ async function boot() {
 
     if (r.error) throw r.error;
 
-    t = r.data?.[0];
+    t = r.data?.[0
+      if (!t) throw new Error("Tournament unavailable");
     const registerUrl =
   t.tournament_type === "solo"
     ? "register-solo.html"
@@ -41,7 +42,7 @@ document
     link.rel = "noopener";
   });
 
-    if (!t) throw new Error("Tournament unavailable");
+   
 
     const poster = t.poster_url || "assets/weekly-wars-s2.png";
 
