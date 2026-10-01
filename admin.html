@@ -207,19 +207,6 @@ input[type=file]{padding:10px}input[type=checkbox]{width:17px;height:17px;accent
       .social-admin-grid{grid-template-columns:1fr}
     }
 
-    /* ===== ADMIN PAGES / NAVIGATION ===== */
-    .admin-nav{display:flex;gap:9px;flex-wrap:wrap;margin:0 0 20px;padding:7px;background:rgba(10,13,19,.92);border:1px solid rgba(255,255,255,.08);border-radius:16px;position:sticky;top:12px;z-index:20;backdrop-filter:blur(14px)}
-    .admin-nav button{flex:1;min-width:140px;background:transparent;color:#9ca6b7;border-color:transparent;box-shadow:none}
-    .admin-nav button:hover{color:#fff;background:rgba(255,255,255,.04);filter:none;transform:none}
-    .admin-nav button.active{color:#08090c;background:linear-gradient(135deg,var(--gold2),var(--gold));border-color:rgba(246,200,74,.5)}
-    .admin-page{display:none}.admin-page.active{display:block}
-    .page-head{display:flex;justify-content:space-between;align-items:center;gap:14px;margin:0 0 16px;flex-wrap:wrap}
-    .page-kicker{color:var(--gold);font-size:11px;font-weight:900;letter-spacing:1.5px}
-    .page-title{font:900 24px Orbitron,sans-serif;margin-top:4px}
-    .registration-downloads{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}
-    .registration-downloads button{min-width:150px}
-    @media(max-width:760px){.admin-nav{position:static}.admin-nav button{min-width:calc(50% - 5px);flex:0 0 calc(50% - 5px)}}
-
 </style>
 </head>
 
@@ -265,16 +252,7 @@ input[type=file]{padding:10px}input[type=checkbox]{width:17px;height:17px;accent
         </div>
       </div>
 
-      <nav class="admin-nav" aria-label="Admin sections">
-        <button type="button" data-page="overview" class="active">OVERVIEW</button>
-        <button type="button" data-page="tournaments">TOURNAMENTS</button>
-        <button type="button" data-page="groups">GROUPS</button>
-        <button type="button" data-page="registrations">REGISTRATIONS</button>
-        <button type="button" data-page="settings">SETTINGS</button>
-      </nav>
 
-      <!-- OVERVIEW PAGE -->
-      <section id="page-overview" class="admin-page active">
       <!-- STATS -->
       <div class="stats">
 
@@ -304,14 +282,9 @@ input[type=file]{padding:10px}input[type=checkbox]{width:17px;height:17px;accent
         </div>
 
       </div>
-      </section>
 
-      <!-- TOURNAMENTS PAGE -->
-      <section id="page-tournaments" class="admin-page">
-      <div class="page-head">
-        <div><div class="page-kicker">TOURNAMENT OPERATIONS</div><div class="page-title">Tournament Management</div></div>
-        <div class="muted">Create, edit, publish and manage tournament settings.</div>
-      </div>
+
+      
       <!-- TOURNAMENT MANAGEMENT -->
 <div class="card" style="margin-top:20px;">
   <div class="topbar">
@@ -418,14 +391,7 @@ input[type=file]{padding:10px}input[type=checkbox]{width:17px;height:17px;accent
     <div class="muted">Loading tournaments...</div>
   </div>
 </div>
-      </section>
 
-      <!-- GROUPS PAGE -->
-      <section id="page-groups" class="admin-page">
-      <div class="page-head">
-        <div><div class="page-kicker">TOURNAMENT OPERATIONS</div><div class="page-title">Group Management</div></div>
-        <div class="muted">Create groups, assign teams and manage WhatsApp access.</div>
-      </div>
 
 <!-- GROUP MANAGEMENT -->
 <div class="card" style="margin-top:20px;">
@@ -500,14 +466,8 @@ input[type=file]{padding:10px}input[type=checkbox]{width:17px;height:17px;accent
 
   </div>
 </div>
-      </section>
 
-      <!-- SETTINGS PAGE -->
-      <section id="page-settings" class="admin-page">
-      <div class="page-head">
-        <div><div class="page-kicker">SITE CONTROL</div><div class="page-title">Homepage Settings</div></div>
-        <div class="muted">Manage social links shown on the public website.</div>
-      </div>
+
 
 <!-- SOCIAL LINKS MANAGEMENT -->
 <div class="card" style="margin-top:20px;">
@@ -570,14 +530,8 @@ input[type=file]{padding:10px}input[type=checkbox]{width:17px;height:17px;accent
     </button>
   </div>
 </div>
-      </section>
 
-      <!-- REGISTRATIONS PAGE -->
-      <section id="page-registrations" class="admin-page">
-      <div class="page-head">
-        <div><div class="page-kicker">REGISTRATION OPERATIONS</div><div class="page-title">Registration Management</div></div>
-        <div class="muted">Review, edit, export and track every registration.</div>
-      </div>
+
 
 <!-- REGISTRATIONS -->
       <div class="card" style="margin-top:20px;">
@@ -588,10 +542,9 @@ input[type=file]{padding:10px}input[type=checkbox]{width:17px;height:17px;accent
             <div class="muted">Manage tournament registrations</div>
           </div>
 
-          <div class="actions">
-            <button id="exportTxtBtn" class="secondary">DOWNLOAD TXT</button>
-            <button id="exportBtn" class="secondary">EXPORT CSV</button>
-          </div>
+          <button id="exportBtn" class="secondary">
+            EXPORT CSV
+          </button>
         </div>
 
         <div class="filters">
@@ -615,7 +568,6 @@ input[type=file]{padding:10px}input[type=checkbox]{width:17px;height:17px;accent
         <div id="tableArea"></div>
 
       </div>
-      </section>
 
     </div>
 
@@ -741,20 +693,12 @@ async function loadRegistrations() {
       player3_uid,
       player4_name,
       player4_uid,
-      solo_player_name: solo_player_name || null,
-      solo_uid: solo_uid || null,
       status,
       admin_note,
       created_at,
       updated_at,
       solo_player_name,
-      solo_uid,
-      tournaments (
-        name,
-        season,
-        prize_pool,
-        tournament_type
-      )
+      solo_uid
     `)
     .order("created_at", { ascending: false });
 
@@ -773,6 +717,32 @@ async function loadRegistrations() {
   }
 
   registrations = data || [];
+
+  // Load tournament details separately instead of using a nested
+  // Supabase relationship in the registrations select.
+  const tournamentIds = [...new Set(
+    registrations.map(r => r.tournament_id).filter(Boolean)
+  )];
+
+  if (tournamentIds.length) {
+    const { data: tournamentRows, error: tournamentError } = await client
+      .from("tournaments")
+      .select("id, name, season, prize_pool")
+      .in("id", tournamentIds);
+
+    if (tournamentError) {
+      console.error("Tournament lookup error:", tournamentError);
+    }
+
+    const tournamentMap = Object.fromEntries(
+      (tournamentRows || []).map(t => [t.id, t])
+    );
+
+    registrations = registrations.map(r => ({
+      ...r,
+      tournaments: tournamentMap[r.tournament_id] || null
+    }));
+  }
 
   updateStats();
   renderTable();
@@ -849,9 +819,8 @@ function renderTable() {
         <thead>
           <tr>
             <th>Registration ID</th>
-            <th>Type</th>
-            <th>Team / Player</th>
-            <th>Player / IGL</th>
+            <th>Team</th>
+            <th>IGL</th>
             <th>Tournament</th>
             <th>Status</th>
             <th>Created</th>
@@ -874,9 +843,8 @@ function renderTable() {
     html += `
       <tr>
         <td><strong>${escapeHtml(r.registration_id)}</strong></td>
-        <td>${escapeHtml((r.tournaments?.tournament_type || "squad").toUpperCase())}</td>
-        <td>${escapeHtml(r.tournaments?.tournament_type === "solo" ? (r.solo_player_name || "—") : (r.team_name || "—"))}</td>
-        <td>${escapeHtml(r.tournaments?.tournament_type === "solo" ? (r.solo_uid || "—") : (r.igl_name || "—"))}</td>
+        <td>${escapeHtml(r.team_name)}</td>
+        <td>${escapeHtml(r.igl_name)}</td>
         <td>${escapeHtml(tournament)}</td>
         <td>
           <span class="status">
@@ -1002,23 +970,6 @@ window.viewRegistration = function(id) {
 
     </div>
 
-    <div class="detail-grid" style="margin-top:12px;">
-      ${detail("Tournament Type", (r.tournaments?.tournament_type || "squad").toUpperCase())}
-      ${detail("Solo Player Name", r.solo_player_name || "—")}
-      ${detail("Solo UID", r.solo_uid || "—")}
-    </div>
-
-    <div class="detail-grid" style="margin-top:12px;">
-      <label>
-        Solo Player Name
-        <input id="editSoloPlayerName" value="${escapeHtml(r.solo_player_name || "")}" autocomplete="off">
-      </label>
-      <label>
-        Solo UID
-        <input id="editSoloUid" value="${escapeHtml(r.solo_uid || "")}" autocomplete="off">
-      </label>
-    </div>
-
     <label style="margin-top:16px;">Status</label>
 
     <select id="editStatus">
@@ -1049,13 +1000,6 @@ window.viewRegistration = function(id) {
         onclick="saveRegistration()"
       >
         SAVE CHANGES
-      </button>
-
-      <button
-        class="secondary"
-        onclick="downloadRegistrationTxt('${r.id}')"
-      >
-        DOWNLOAD TXT
       </button>
 
       <button
@@ -1119,12 +1063,6 @@ window.saveRegistration = async function() {
 
   const player4_uid =
     document.getElementById("editP4Uid").value.trim();
-
-  const solo_player_name =
-    document.getElementById("editSoloPlayerName")?.value.trim() || "";
-
-  const solo_uid =
-    document.getElementById("editSoloUid")?.value.trim() || "";
 
   if (!team_name || !igl_name || !igl_uid || !igl_mobile ||
       !player2_name || !player2_uid ||
@@ -1227,86 +1165,6 @@ document.getElementById("refreshBtn")
   .addEventListener("click", loadRegistrations);
 
 
-function registrationText(r) {
-  const type = String(r.tournaments?.tournament_type || "squad").toUpperCase();
-  const lines = [
-    "========================================",
-    "HAWKS VERSE REGISTRATION",
-    "========================================",
-    `Registration ID : ${r.registration_id || "—"}`,
-    `Tournament      : ${r.tournaments?.name || "—"}`,
-    `Tournament Type : ${type}`,
-    `Status          : ${formatStatus(r.status)}`,
-    `Created At      : ${r.created_at ? new Date(r.created_at).toLocaleString() : "—"}`,
-    `Updated At      : ${r.updated_at ? new Date(r.updated_at).toLocaleString() : "—"}`,
-    "",
-    "CONTACT",
-    `Email           : ${r.igl_email || "—"}`,
-    `Mobile          : ${r.igl_mobile || "—"}`,
-    ""
-  ];
-
-  if (type === "SOLO") {
-    lines.push(
-      "SOLO PLAYER",
-      `Player Name     : ${r.solo_player_name || "—"}`,
-      `UID             : ${r.solo_uid || "—"}`,
-      ""
-    );
-  } else {
-    lines.push(
-      "SQUAD DETAILS",
-      `Team Name       : ${r.team_name || "—"}`,
-      `IGL Name        : ${r.igl_name || "—"}`,
-      `IGL UID         : ${r.igl_uid || "—"}`,
-      `Player 2        : ${r.player2_name || "—"} | UID: ${r.player2_uid || "—"}`,
-      `Player 3        : ${r.player3_name || "—"} | UID: ${r.player3_uid || "—"}`,
-      `Player 4        : ${r.player4_name || "—"} | UID: ${r.player4_uid || "—"}`,
-      ""
-    );
-  }
-
-  lines.push(
-    "ADMIN",
-    `Admin Note      : ${r.admin_note || "—"}`,
-    "========================================",
-    "Generated from HAWKS VERSE Admin Dashboard"
-  );
-
-  return lines.join("\n");
-}
-
-function downloadTextFile(filename, text) {
-  const blob = new Blob([text], { type: "text/plain;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
-}
-
-window.downloadRegistrationTxt = function(id) {
-  const r = registrations.find(x => x.id === id);
-  if (!r) return;
-  const safeId = String(r.registration_id || "registration").replace(/[^a-z0-9_-]/gi, "-");
-  downloadTextFile(`hawks-verse-${safeId}.txt`, registrationText(r));
-};
-
-document.getElementById("exportTxtBtn")
-  .addEventListener("click", () => {
-    if (!registrations.length) {
-      alert("No registrations to export.");
-      return;
-    }
-
-    const content = registrations.map(registrationText).join("\n\n");
-    downloadTextFile("hawks-verse-registrations.txt", content);
-  });
-
-
 document.getElementById("exportBtn")
   .addEventListener("click", () => {
 
@@ -1318,14 +1176,10 @@ document.getElementById("exportBtn")
     const headers = [
       "Registration ID",
       "Tournament",
-      "Tournament Type",
       "Team Name",
-      "Solo Player Name",
-      "Solo UID",
       "IGL Name",
       "IGL UID",
       "IGL Mobile",
-      "IGL Email",
       "Player 2 Name",
       "Player 2 UID",
       "Player 3 Name",
@@ -1346,14 +1200,10 @@ document.getElementById("exportBtn")
       const row = [
         r.registration_id,
         r.tournaments?.name || "",
-        r.tournaments?.tournament_type || "squad",
         r.team_name,
-        r.solo_player_name || "",
-        r.solo_uid || "",
         r.igl_name,
         r.igl_uid,
         r.igl_mobile,
-        r.igl_email,
         r.player2_name,
         r.player2_uid,
         r.player3_name,
@@ -2415,36 +2265,6 @@ async function saveSocialSettings() {
 
 document.getElementById("saveSocialSettingsBtn")
   .addEventListener("click", saveSocialSettings);
-
-// ==================== ADMIN PAGE NAVIGATION ====================
-
-function openAdminPage(page, updateHash = true) {
-  const validPages = ["overview", "tournaments", "groups", "registrations", "settings"];
-  const target = validPages.includes(page) ? page : "overview";
-
-  document.querySelectorAll(".admin-page").forEach(section => {
-    section.classList.toggle("active", section.id === `page-${target}`);
-  });
-
-  document.querySelectorAll(".admin-nav button[data-page]").forEach(button => {
-    button.classList.toggle("active", button.dataset.page === target);
-  });
-
-  if (updateHash) {
-    history.replaceState(null, "", `#${target}`);
-  }
-}
-
-document.querySelectorAll(".admin-nav button[data-page]").forEach(button => {
-  button.addEventListener("click", () => openAdminPage(button.dataset.page));
-});
-
-function openAdminPageFromHash() {
-  openAdminPage(window.location.hash.replace("#", ""), false);
-}
-
-window.addEventListener("hashchange", openAdminPageFromHash);
-openAdminPageFromHash();
 
 // Make tournament loading happen whenever admin panel opens.
 const oldShowAdmin = showAdmin;
