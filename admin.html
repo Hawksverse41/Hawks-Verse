@@ -1030,7 +1030,16 @@ window.viewRegistration = function(id) {
       </button>
 
       <button
+        class="danger"
+        type="button"
+        onclick="deleteRegistration()"
+      >
+        DELETE TEAM
+      </button>
+
+      <button
         class="secondary"
+        type="button"
         onclick="closeDetails()"
       >
         CLOSE
@@ -1131,6 +1140,50 @@ window.saveRegistration = async function() {
   await loadRegistrations();
 
   selectedRegistration = null;
+};
+
+
+window.deleteRegistration = async function() {
+  if (!selectedRegistration) return;
+
+  const registration = selectedRegistration;
+  const label = registration.registration_id || registration.team_name || "this registration";
+  const confirmed = confirm(
+    `Permanently delete ${label}?\n\nThis removes the registration and its group assignment. This cannot be undone.`
+  );
+  if (!confirmed) return;
+
+  const buttons = document.querySelectorAll("#detailsBox button");
+  buttons.forEach(button => { button.disabled = true; });
+
+  try {
+    // Remove linked group assignment first so no orphaned assignment remains.
+    const { error: assignmentError } = await client
+      .from("tournament_group_assignments")
+      .delete()
+      .eq("registration_id", registration.id);
+
+    if (assignmentError) {
+      alert("Could not remove group assignment: " + assignmentError.message);
+      return;
+    }
+
+    const { error } = await client
+      .from("registrations")
+      .delete()
+      .eq("id", registration.id);
+
+    if (error) {
+      alert("Delete failed: " + error.message);
+      return;
+    }
+
+    selectedRegistration = null;
+    showToast("Registration deleted successfully.");
+    await loadRegistrations();
+  } finally {
+    buttons.forEach(button => { button.disabled = false; });
+  }
 };
 
 
