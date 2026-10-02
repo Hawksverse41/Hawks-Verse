@@ -207,6 +207,15 @@ input[type=file]{padding:10px}input[type=checkbox]{width:17px;height:17px;accent
       .social-admin-grid{grid-template-columns:1fr}
     }
 
+
+/* Admin section navigation */
+.admin-nav{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:18px 0 22px;padding:8px;border:1px solid var(--line);border-radius:16px;background:#090c12}
+.admin-nav button{background:transparent;color:var(--muted);border:1px solid transparent;padding:13px 10px}
+.admin-nav button.active{background:linear-gradient(135deg,var(--gold2),var(--gold));color:#08090c}
+.admin-page{display:none}
+.admin-page.active{display:block}
+@media(max-width:760px){.admin-nav{grid-template-columns:repeat(2,minmax(0,1fr))}.admin-nav button:last-child{grid-column:1/-1}}
+
 </style>
 </head>
 
@@ -542,9 +551,10 @@ input[type=file]{padding:10px}input[type=checkbox]{width:17px;height:17px;accent
             <div class="muted">Manage tournament registrations</div>
           </div>
 
-          <button id="exportBtn" class="secondary">
-            EXPORT CSV
-          </button>
+          <div class="actions">
+            <button id="exportTxtBtn" class="secondary" type="button">DOWNLOAD TXT</button>
+            <button id="exportBtn" class="secondary" type="button">EXPORT CSV</button>
+          </div>
         </div>
 
         <div class="filters">
@@ -2284,6 +2294,93 @@ client.auth.onAuthStateChange((event, session) => {
   }
 });
 
+
+
+// ===== ADMIN NAVIGATION: one section visible at a time =====
+(function setupAdminPages(){
+  const panel = document.getElementById('adminPanel');
+  if (!panel || document.getElementById('adminNav')) return;
+  const topbar = panel.querySelector('.card.topbar');
+  const stats = panel.querySelector('.stats');
+  const tournamentCard = document.getElementById('newTournamentBtn')?.closest('.card');
+  const groupsCard = document.getElementById('groupTournament')?.closest('.card');
+  const socialCard = document.getElementById('socialInstagramUrl')?.closest('.card');
+  const registrationsCard = document.getElementById('tableArea')?.closest('.card');
+  if (!topbar || !stats || !tournamentCard || !groupsCard || !socialCard || !registrationsCard) return;
+
+  const nav = document.createElement('nav');
+  nav.id = 'adminNav'; nav.className = 'admin-nav';
+  nav.setAttribute('aria-label','Admin sections');
+  const host = document.createElement('div'); host.id = 'adminPages';
+  const overview = document.createElement('section'); overview.className = 'admin-page'; overview.id='page-overview';
+  const tournaments = document.createElement('section'); tournaments.className='admin-page'; tournaments.id='page-tournaments';
+  const groups = document.createElement('section'); groups.className='admin-page'; groups.id='page-groups';
+  const registrationsPage = document.createElement('section'); registrationsPage.className='admin-page'; registrationsPage.id='page-registrations';
+  const settings = document.createElement('section'); settings.className='admin-page'; settings.id='page-settings';
+  overview.appendChild(stats);
+  tournaments.appendChild(tournamentCard);
+  groups.appendChild(groupsCard);
+  registrationsPage.appendChild(registrationsCard);
+  settings.appendChild(socialCard);
+  const pages=[['overview','OVERVIEW',overview],['tournaments','TOURNAMENTS',tournaments],['groups','GROUPS',groups],['registrations','REGISTRATIONS',registrationsPage],['settings','SETTINGS',settings]];
+  pages.forEach(([key,label,page])=>{
+    const button=document.createElement('button'); button.type='button'; button.textContent=label; button.dataset.page=key;
+    button.addEventListener('click',()=>showPage(key,true)); nav.appendChild(button); host.appendChild(page);
+  });
+  topbar.after(nav); nav.after(host);
+  function showPage(key, updateHash){
+    pages.forEach(([name,,page])=>{
+      page.classList.toggle('active',name===key);
+      const b=nav.querySelector(`[data-page="${name}"]`);
+      b.classList.toggle('active',name===key); b.setAttribute('aria-current',name===key?'page':'false');
+    });
+    if(updateHash) history.replaceState(null,'','#'+key);
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+  window.hawksShowAdminPage = showPage;
+  window.addEventListener('hashchange',()=>{
+    const key=location.hash.slice(1);
+    if(pages.some(([name])=>name===key)) showPage(key,false);
+  });
+  const initial=location.hash.slice(1);
+  showPage(pages.some(([name])=>name===initial)?initial:'overview',false);
+})();
+
+// Download a readable text file containing all currently loaded registrations.
+document.getElementById('exportTxtBtn')?.addEventListener('click',()=>{
+  if(!Array.isArray(registrations) || registrations.length===0){
+    alert('No registrations to export.'); return;
+  }
+  const lines=['HAWKS VERSE — REGISTRATION LIST','Exported: '+new Date().toLocaleString(),'Total registrations: '+registrations.length,''];
+  registrations.forEach((r,i)=>{
+    lines.push('========================================');
+    lines.push('REGISTRATION '+(i+1));
+    lines.push('Registration ID: '+(r.registration_id||r.id||'-'));
+    lines.push('Tournament: '+(r.tournaments?.name||r.tournament_name||r.tournament_id||'-'));
+    lines.push('Type: '+(r.solo_uid?'SOLO':'SQUAD'));
+    if(r.solo_uid || r.solo_player_name){
+      lines.push('Player Name: '+(r.solo_player_name||'-'));
+      lines.push('Player UID: '+(r.solo_uid||'-'));
+    } else {
+      lines.push('Team Name: '+(r.team_name||'-'));
+      lines.push('IGL Name: '+(r.igl_name||'-'));
+      lines.push('IGL UID: '+(r.igl_uid||'-'));
+      lines.push('IGL Mobile: '+(r.igl_mobile||'-'));
+      lines.push('IGL Email: '+(r.igl_email||'-'));
+      lines.push('Player 2: '+(r.player2_name||'-')+' | UID: '+(r.player2_uid||'-'));
+      lines.push('Player 3: '+(r.player3_name||'-')+' | UID: '+(r.player3_uid||'-'));
+      lines.push('Player 4: '+(r.player4_name||'-')+' | UID: '+(r.player4_uid||'-'));
+    }
+    lines.push('Status: '+(r.status||'-'));
+    lines.push('Admin Note: '+(r.admin_note||'-'));
+    lines.push('Submitted: '+(r.created_at?new Date(r.created_at).toLocaleString():'-'));
+    lines.push('');
+  });
+  const blob=new Blob([lines.join('\n')],{type:'text/plain;charset=utf-8'});
+  const url=URL.createObjectURL(blob); const a=document.createElement('a');
+  a.href=url; a.download='hawks-verse-registrations-'+new Date().toISOString().slice(0,10)+'.txt';
+  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+});
 
 checkSession();
 
