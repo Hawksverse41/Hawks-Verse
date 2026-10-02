@@ -464,6 +464,23 @@ input[type=file]{padding:10px}input[type=checkbox]{width:17px;height:17px;accent
       </div>
     </div>
 
+    <div class="group-form" style="margin-top:14px;">
+      <div class="group-kicker">MANUAL TEAM ASSIGNMENT</div>
+      <div class="muted" style="margin:6px 0 12px;">Assign an unassigned registered/confirmed team to a group. Full groups cannot accept more teams.</div>
+      <div class="group-form-grid">
+        <label class="full">Team
+          <select id="manualAssignRegistration"><option value="">Select unassigned team</option></select>
+        </label>
+        <label class="full">Destination Group
+          <select id="manualAssignGroup"><option value="">Select group</option></select>
+        </label>
+      </div>
+      <div class="group-save-row">
+        <span id="manualAssignStatus" class="muted"></span>
+        <button id="manualAssignBtn" class="primary" type="button">ASSIGN TEAM</button>
+      </div>
+    </div>
+
     <div id="groupList" class="group-list-box">
       <div class="muted">Select a tournament to view groups.</div>
     </div>
@@ -1739,6 +1756,45 @@ async function loadGroupsForTournament(tournamentId) {
     }
   }
 
+  // Populate manual assignment controls with eligible registrations that are not assigned yet.
+  const manualTeamSelect = document.getElementById("manualAssignRegistration");
+  const manualGroupSelect = document.getElementById("manualAssignGroup");
+  const manualStatus = document.getElementById("manualAssignStatus");
+  if (manualTeamSelect && manualGroupSelect) {
+    const { data: eligibleRegs, error: eligibleError } = await client
+      .from("registrations")
+      .select("id, registration_id, team_name, igl_name, status")
+      .eq("tournament_id", tournamentId)
+      .in("status", ["registered", "confirmed"])
+      .order("created_at", { ascending: true });
+    if (eligibleError) {
+      console.error("Manual assignment registration load error:", eligibleError);
+      if (manualStatus) manualStatus.textContent = "Could not load teams: " + eligibleError.message;
+    } else {
+      const { data: allAssignments, error: allAssignmentsError } = await client
+        .from("tournament_group_assignments")
+        .select("registration_id")
+        .in("group_id", groupIds);
+      if (allAssignmentsError) {
+        console.error("Manual assignment lookup error:", allAssignmentsError);
+        if (manualStatus) manualStatus.textContent = "Could not check existing assignments.";
+      } else {
+        const assignedSet = new Set((allAssignments || []).map(a => a.registration_id));
+        const unassigned = (eligibleRegs || []).filter(r => !assignedSet.has(r.id));
+        manualTeamSelect.innerHTML = '<option value="">Select unassigned team</option>' + unassigned.map(r =>
+          `<option value="${escapeHtml(r.id)}">${escapeHtml(r.registration_id || '—')} — ${escapeHtml(r.team_name || r.igl_name || 'Unnamed team')}</option>`
+        ).join("");
+        manualGroupSelect.innerHTML = '<option value="">Select group</option>' + groups.map(g => {
+          const count = (assignments || []).filter(a => a.group_id === g.id).length;
+          const cap = Number(g.max_slots || 0);
+          const full = cap > 0 && count >= cap;
+          return `<option value="${escapeHtml(g.id)}" ${full ? 'disabled' : ''}>${escapeHtml(g.group_name)} (${count}/${cap}${full ? ' — FULL' : ''})</option>`;
+        }).join("");
+        if (manualStatus) manualStatus.textContent = unassigned.length ? `${unassigned.length} unassigned team(s) available.` : "No unassigned registered/confirmed teams.";
+      }
+    }
+  }
+
   list.innerHTML = groups.map(group => {
     const assigned = (assignments || [])
       .filter(a => a.group_id === group.id)
@@ -1758,7 +1814,10 @@ async function loadGroupsForTournament(tournamentId) {
                 ${escapeHtml(r.registration_id || "—")} • IGL: ${escapeHtml(r.igl_name || "—")}
               </div>
             </div>
-            <span class="status">${escapeHtml(r.status || "confirmed")}</span>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <span class="status">${escapeHtml(r.status || "confirmed")}</span>
+              <button class="danger" type="button" style="padding:7px 10px;font-size:11px;" onclick="removeTeamFromGroup('${(assignments || []).find(a => a.group_id === group.id && a.registration_id === r.id)?.id || ''}')">REMOVE FROM GROUP</button>
+            </div>
           </div>
         `).join("")
       : '<div class="muted" style="padding:12px 0;">No teams assigned yet.</div>';
@@ -1808,6 +1867,49 @@ async function loadGroupsForTournament(tournamentId) {
     `;
   }).join("");
 }
+
+window.removeTeamFromGroup = async function(assignmentId) {
+  if (!assignmentId) { alert("Could not identify this assignment. Refresh Groups and try again."); return; }
+  if (!confirm("Remove this team from the group? Their tournament registration will NOT be deleted.")) return;
+  const { error } = await client.from("tournament_group_assignments").delete().eq("id", assignmentId);
+  if (error) { alert("Could not remove team from group: " + error.message); return; }
+  showToast("Team removed from group. Registration is preserved.");
+  await loadGroupsForTournament(document.getElementById("groupTournament").value);
+};
+
+async function manuallyAssignTeam() {
+  const tournamentId = document.getElementById("groupTournament").value;
+  const registrationId = document.getElementById("manualAssignRegistration").value;
+  const groupId = document.getElementById("manualAssignGroup").value;
+  if (!tournamentId || !registrationId || !groupId) { alert("Select a team and destination group first."); return; }
+
+  const { data: group, error: groupError } = await client.from("tournament_groups")
+    .select("id, tournament_id, group_name, max_slots").eq("id", groupId).single();
+  if (groupError || !group || group.tournament_id !== tournamentId) { alert("Invalid destination group. Refresh and try again."); return; }
+
+  const { data: currentAssignments, error: assignmentError } = await client.from("tournament_group_assignments")
+    .select("registration_id, group_id").in("group_id", (await client.from("tournament_groups").select("id").eq("tournament_id", tournamentId)).data?.map(g => g.id) || []);
+  if (assignmentError) { alert("Could not check current assignments: " + assignmentError.message); return; }
+  if ((currentAssignments || []).some(a => a.registration_id === registrationId)) {
+    alert("This team is already assigned to a group. Remove it from its current group first.");
+    await loadGroupsForTournament(tournamentId); return;
+  }
+  const { count, error: countError } = await client.from("tournament_group_assignments")
+    .select("id", { count: "exact", head: true }).eq("group_id", groupId);
+  if (countError) { alert("Could not check group capacity: " + countError.message); return; }
+  if (Number(count || 0) >= Number(group.max_slots || 0)) {
+    alert(`${group.group_name} is full (${count}/${group.max_slots}). This team was not assigned.`); return;
+  }
+  const button = document.getElementById("manualAssignBtn");
+  button.disabled = true; button.textContent = "ASSIGNING...";
+  const { error } = await client.from("tournament_group_assignments").insert({ group_id: groupId, registration_id: registrationId });
+  button.disabled = false; button.textContent = "ASSIGN TEAM";
+  if (error) { alert("Assignment failed: " + error.message); return; }
+  showToast(`Team assigned to ${group.group_name}.`);
+  await loadGroupsForTournament(tournamentId);
+}
+
+document.getElementById("manualAssignBtn")?.addEventListener("click", manuallyAssignTeam);
 
 window.editGroup = async function(id) {
   const { data: group, error } = await client
@@ -2346,38 +2448,40 @@ client.auth.onAuthStateChange((event, session) => {
   showPage(pages.some(([name])=>name===initial)?initial:'overview',false);
 })();
 
-// Download a compact tab-separated text file: one registration per row.
+// Download a readable text file containing all currently loaded registrations.
 document.getElementById('exportTxtBtn')?.addEventListener('click',()=>{
   if(!Array.isArray(registrations) || registrations.length===0){
     alert('No registrations to export.'); return;
   }
-
-  // Tabs keep the five requested fields in separate horizontal columns.
-  const headers = ['Registration ID','IGL Name','Mobile Number','Gmail','UID'];
-  const cleanCell = value => String(value ?? '-').replace(/[\t\r\n]+/g, ' ').trim() || '-';
-  const lines = [headers.join('\t')];
-
-  registrations.forEach(r=>{
-    const isSolo = !!(r.solo_uid || r.solo_player_name);
-    const row = [
-      r.registration_id || r.id || '-',
-      isSolo ? (r.solo_player_name || r.igl_name || '-') : (r.igl_name || '-'),
-      r.igl_mobile || '-',
-      r.igl_email || '-',
-      isSolo ? (r.solo_uid || r.igl_uid || '-') : (r.igl_uid || '-')
-    ];
-    lines.push(row.map(cleanCell).join('\t'));
+  const lines=['HAWKS VERSE — REGISTRATION LIST','Exported: '+new Date().toLocaleString(),'Total registrations: '+registrations.length,''];
+  registrations.forEach((r,i)=>{
+    lines.push('========================================');
+    lines.push('REGISTRATION '+(i+1));
+    lines.push('Registration ID: '+(r.registration_id||r.id||'-'));
+    lines.push('Tournament: '+(r.tournaments?.name||r.tournament_name||r.tournament_id||'-'));
+    lines.push('Type: '+(r.solo_uid?'SOLO':'SQUAD'));
+    if(r.solo_uid || r.solo_player_name){
+      lines.push('Player Name: '+(r.solo_player_name||'-'));
+      lines.push('Player UID: '+(r.solo_uid||'-'));
+    } else {
+      lines.push('Team Name: '+(r.team_name||'-'));
+      lines.push('IGL Name: '+(r.igl_name||'-'));
+      lines.push('IGL UID: '+(r.igl_uid||'-'));
+      lines.push('IGL Mobile: '+(r.igl_mobile||'-'));
+      lines.push('IGL Email: '+(r.igl_email||'-'));
+      lines.push('Player 2: '+(r.player2_name||'-')+' | UID: '+(r.player2_uid||'-'));
+      lines.push('Player 3: '+(r.player3_name||'-')+' | UID: '+(r.player3_uid||'-'));
+      lines.push('Player 4: '+(r.player4_name||'-')+' | UID: '+(r.player4_uid||'-'));
+    }
+    lines.push('Status: '+(r.status||'-'));
+    lines.push('Admin Note: '+(r.admin_note||'-'));
+    lines.push('Submitted: '+(r.created_at?new Date(r.created_at).toLocaleString():'-'));
+    lines.push('');
   });
-
-  const blob = new Blob(['\uFEFF' + lines.join('\r\n')], {type:'text/plain;charset=utf-8'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'hawks-verse-registrations-' + new Date().toISOString().slice(0,10) + '.txt';
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  setTimeout(()=>URL.revokeObjectURL(url), 1000);
+  const blob=new Blob([lines.join('\n')],{type:'text/plain;charset=utf-8'});
+  const url=URL.createObjectURL(blob); const a=document.createElement('a');
+  a.href=url; a.download='hawks-verse-registrations-'+new Date().toISOString().slice(0,10)+'.txt';
+  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
 });
 
 checkSession();
