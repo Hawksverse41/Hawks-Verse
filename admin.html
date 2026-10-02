@@ -1901,12 +1901,20 @@ async function manuallyAssignTeam() {
     alert(`${group.group_name} is full (${count}/${group.max_slots}). This team was not assigned.`); return;
   }
   const button = document.getElementById("manualAssignBtn");
-  button.disabled = true; button.textContent = "ASSIGNING...";
-  const { error } = await client.from("tournament_group_assignments").insert({ group_id: groupId, registration_id: registrationId });
-  button.disabled = false; button.textContent = "ASSIGN TEAM";
-  if (error) { alert("Assignment failed: " + error.message); return; }
-  showToast(`Team assigned to ${group.group_name}.`);
-  await loadGroupsForTournament(tournamentId);
+  if (button) { button.disabled = true; button.textContent = "ASSIGNING..."; }
+  try {
+    // tournament_id is required by the database schema.
+    const { error } = await client.from("tournament_group_assignments").insert({
+      tournament_id: group.tournament_id,
+      group_id: groupId,
+      registration_id: registrationId
+    });
+    if (error) { alert("Assignment failed: " + error.message); return; }
+    showToast(`Team assigned to ${group.group_name}.`);
+    await loadGroupsForTournament(tournamentId);
+  } finally {
+    if (button) { button.disabled = false; button.textContent = "ASSIGN TEAM"; }
+  }
 }
 
 document.getElementById("manualAssignBtn")?.addEventListener("click", manuallyAssignTeam);
