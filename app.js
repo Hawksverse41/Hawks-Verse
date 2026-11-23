@@ -82,7 +82,7 @@ async function boot() {
         ? "register-solo.html"
         : "register.html";
 
-      const registerLinks = document.querySelectorAll(
+    const registerLinks = document.querySelectorAll(
       'a[href="register.html"], a[href="#register"], a.round-arrow'
     );
 
@@ -284,12 +284,55 @@ if (registrationForm) {
       p_player4_uid: $("uid4").value.trim()
     };
 
+    // Open synchronously from the submit gesture to avoid popup blockers.
+    // This confirmation flow is intentionally Squad-only.
+    const isSquadRegistration =
+      String(window.HAWKS_REGISTRATION_TYPE || "").toLowerCase() === "squad";
+
+    const confirmationTab = isSquadRegistration
+      ? window.open("registration-confirmation.html", "_blank")
+      : null;
+
+    let confirmationReady = false;
+    let confirmationPayload = null;
+const sendConfirmation = event => {
+    if (
+        confirmationTab &&
+        event.origin === window.location.origin &&
+        event.source === confirmationTab &&
+        event.data?.type === "HAWKS_CONFIRMATION_READY"
+    ) {
+        confirmationReady = true;
+
+        if (confirmationPayload) {
+            confirmationTab.postMessage(
+                {
+                    type: "HAWKS_CONFIRMATION_DATA",
+                    payload: confirmationPayload
+                },
+                window.location.origin
+            );
+        }
+
+        window.removeEventListener("message", sendConfirmation);
+    }
+};
+
+   if (confirmationTab) {
+      window.addEventListener("message", sendConfirmation);
+    }
+
     const r = await db.rpc(
       "create_registration",
       p
     );
 
     if (r.error) {
+      if (confirmationTab && !confirmationTab.closed) {
+        confirmationTab.close();
+      }
+
+      window.removeEventListener("message", sendConfirmation);
       alert(r.error.message);
       return;
     }
@@ -299,26 +342,60 @@ if (registrationForm) {
       : r.data?.registration_id ?? r.data;
 
     if (!id) {
+      if (confirmationTab && !confirmationTab.closed) {
+        confirmationTab.close();
+      }
+
+      window.removeEventListener("message", sendConfirmation);
+
       alert(
         "Registration created, but Registration ID could not be read."
       );
+
       return;
     }
 
-    if ($("result")) {
+    confirmationPayload = {
+      registrationId: String(id),
+      iglMobile: p.p_igl_mobile,
+      tournamentName: String(t.name || "HAWKS VERSE Tournament"),
+      teamName: p.p_team_name,
+      iglName: p.p_igl_name,
+      iglUid: p.p_igl_uid,
+      players: [
+        { name: p.p_igl_name, uid: p.p_igl_uid, role: "IGL" },
+        { name: p.p_player2_name, uid: p.p_player2_uid, role: "PLAYER 2" },
+        { name: p.p_player3_name, uid: p.p_player3_uid, role: "PLAYER 3" },
+        { name: p.p_player4_name, uid: p.p_player4_uid, role: "PLAYER 4" }
+      ].filter(player => player.name || player.uid)
+    };
+
+    if (confirmationTab && !confirmationTab.closed) {
+      // The confirmation page announces readiness; if it loaded first,
+      // it will receive this message immediately on its next READY ping.
+      if (confirmationReady) {
+        confirmationTab.postMessage(
+          { type: "HAWKS_CONFIRMATION_DATA", payload: confirmationPayload },
+          window.location.origin
+        );
+      }
+
+      if ($("result")) {
+        $("result").textContent =
+          "✓ Registration successful. Your confirmation has opened in a new tab.";
+      }
+    } else if ($("result")) {
       $("result").innerHTML =
         "<b>REGISTRATION SUCCESSFUL</b><br>" +
         "Registration ID: <strong>" +
-        id +
+        escapeHtml(id) +
         "</strong><br>" +
-        "Save this ID for status checks.";
+        "Your browser blocked the confirmation tab. Please allow pop-ups and register again only if this registration was not created.";
     }
 
     registrationForm.reset();
   };
 }
-
-
 // ===============================
 // REGISTRATION STATUS CHECK
 // ===============================
@@ -518,8 +595,6 @@ function safeUrl(value) {
 
   return "#";
 }
-
-
 // =========================================================
 // PARTICIPANT EDIT REGISTRATION
 // Verification: Registration ID + IGL Mobile
