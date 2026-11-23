@@ -2536,7 +2536,244 @@ document.getElementById('exportTxtBtn')?.addEventListener('click',()=>{
   a.href=url; a.download='hawks-verse-registrations-'+new Date().toISOString().slice(0,10)+'.txt';
   document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
 });
+// ==========================================
+// HAWKS VERSE — BULK REGISTRATION DELETE
+// ==========================================
 
+(function () {
+  const selectedIds = new Set();
+
+  const tableArea = document.getElementById("tableArea");
+  if (!tableArea) return;
+
+  // Tournament filter and bulk controls
+  const controls = document.createElement("div");
+  controls.style.cssText =
+    "display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin:18px 0;padding:15px;background:#111722;border:1px solid #333;border-radius:12px;";
+
+  controls.innerHTML = `
+    <select id="bulkTournamentFilter" style="max-width:300px">
+      <option value="">Select a tournament first</option>
+    </select>
+    <label style="display:flex;align-items:center;gap:8px;margin:0">
+      <input type="checkbox" id="bulkSelectAll" disabled>
+      SELECT ALL
+    </label>
+    <span id="bulkSelectedCount" style="color:#ffd968;font-weight:800">
+      0 selected
+    </span>
+    <button type="button" id="bulkDeleteBtn" class="danger">
+      DELETE SELECTED
+    </button>
+  `;
+
+  tableArea.parentNode.insertBefore(controls, tableArea);
+
+  const tournamentFilter =
+    document.getElementById("bulkTournamentFilter");
+  const selectAll =
+    document.getElementById("bulkSelectAll");
+  const countLabel =
+    document.getElementById("bulkSelectedCount");
+  const deleteButton =
+    document.getElementById("bulkDeleteBtn");
+
+  function updateTournamentOptions() {
+    const previous = tournamentFilter.value;
+    const map = new Map();
+
+    (registrations || []).forEach(r => {
+      if (r.tournament_id) {
+        map.set(
+          r.tournament_id,
+          r.tournaments?.name || "Tournament"
+        );
+      }
+    });
+
+    tournamentFilter.innerHTML =
+      '<option value="">Select a tournament first</option>';
+
+    map.forEach((name, id) => {
+      const option = document.createElement("option");
+      option.value = id;
+      option.textContent = name;
+      tournamentFilter.appendChild(option);
+    });
+
+    if (map.has(previous)) tournamentFilter.value = previous;
+  }
+
+  const originalFilteredRegistrations = filteredRegistrations;
+
+  filteredRegistrations = function () {
+    const rows = originalFilteredRegistrations();
+    const tournamentId = tournamentFilter.value;
+
+    if (!tournamentId) return rows;
+
+    return rows.filter(r => r.tournament_id === tournamentId);
+  };
+
+  const originalRenderTable = renderTable;
+
+  renderTable = function () {
+    updateTournamentOptions();
+    originalRenderTable();
+
+    const tournamentId = tournamentFilter.value;
+    const rows = filteredRegistrations();
+    const table = tableArea.querySelector("table");
+
+    if (!table) {
+      updateSelectionUI();
+      return;
+    }
+
+    const headerRow = table.querySelector("thead tr");
+    if (headerRow && !headerRow.querySelector(".bulk-heading")) {
+      const th = document.createElement("th");
+      th.className = "bulk-heading";
+      th.textContent = "SELECT";
+      headerRow.prepend(th);
+    }
+
+    const bodyRows = table.querySelectorAll("tbody tr");
+
+    bodyRows.forEach((tr, index) => {
+      if (tr.querySelector(".bulk-registration-check")) return;
+
+      const registration = rows[index];
+      if (!registration) return;
+
+      const td = document.createElement("td");
+      const checkbox = document.createElement("input");
+
+      checkbox.type = "checkbox";
+      checkbox.className = "bulk-registration-check";
+      checkbox.dataset.id = registration.id;
+      checkbox.checked = selectedIds.has(registration.id);
+      checkbox.disabled = !tournamentId;
+
+      checkbox.addEventListener("change", () => {
+        if (checkbox.checked) selectedIds.add(registration.id);
+        else selectedIds.delete(registration.id);
+
+        updateSelectionUI();
+      });
+
+      td.appendChild(checkbox);
+      tr.prepend(td);
+    });
+
+    updateSelectionUI();
+  };
+
+  function updateSelectionUI() {
+    countLabel.textContent = `${selectedIds.size} selected`;
+
+    const tournamentId = tournamentFilter.value;
+    const visible = filteredRegistrations();
+
+    selectAll.disabled = !tournamentId || !visible.length;
+
+    selectAll.checked =
+      visible.length > 0 &&
+      visible.every(r => selectedIds.has(r.id));
+
+    selectAll.indeterminate =
+      visible.some(r => selectedIds.has(r.id)) &&
+      !selectAll.checked;
+  }
+
+  tournamentFilter.addEventListener("change", () => {
+    selectedIds.clear();
+    selectAll.checked = false;
+    renderTable();
+  });
+
+  selectAll.addEventListener("change", () => {
+    filteredRegistrations().forEach(r => {
+      if (selectAll.checked) selectedIds.add(r.id);
+      else selectedIds.delete(r.id);
+    });
+
+    renderTable();
+  });
+
+  deleteButton.addEventListener("click", async () => {
+    const tournamentId = tournamentFilter.value;
+
+    if (!tournamentId) {
+      alert("Please select a tournament first.");
+      return;
+    }
+
+    const ids = [...selectedIds].filter(id =>
+      registrations.some(r =>
+        r.id === id && r.tournament_id === tournamentId
+      )
+    );
+
+    if (!ids.length) {
+      alert("Please select registrations first.");
+      return;
+    }
+
+    if (!confirm(
+      `Permanently delete ${ids.length} selected registration(s) from this tournament?\n\nThis action cannot be undone.`
+    )) return;
+
+    deleteButton.disabled = true;
+    deleteButton.textContent = "DELETING...";
+
+    let deleted = 0;
+    const failed = [];
+
+    try {
+      for (const id of ids) {
+        const { error } = await client.rpc(
+          "delete_registration",
+          { p_registration_id: id }
+        );
+
+        if (error) {
+          failed.push(id);
+          console.error("Delete failed:", id, error);
+        } else {
+          deleted++;
+          selectedIds.delete(id);
+        }
+      }
+
+      await loadRegistrations();
+
+      if (failed.length) {
+        alert(
+          `Deleted: ${deleted}\nFailed: ${failed.length}\n\nSome registrations could not be deleted.`
+        );
+      } else {
+        showToast(`${deleted} registration(s) deleted successfully.`);
+      }
+    } catch (error) {
+      alert("Bulk delete failed: " + error.message);
+    } finally {
+      deleteButton.disabled = false;
+      deleteButton.textContent = "DELETE SELECTED";
+      updateSelectionUI();
+    }
+  });
+
+  const originalLoadRegistrations = loadRegistrations;
+
+  loadRegistrations = async function () {
+    await originalLoadRegistrations();
+    updateTournamentOptions();
+    updateSelectionUI();
+  };
+
+  updateTournamentOptions();
+})();
 checkSession();
 
 </script>
