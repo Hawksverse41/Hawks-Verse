@@ -1,0 +1,523 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registration Confirmed | HAWKS VERSE</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      padding: 35px 16px;
+      background: #080b12;
+      color: #fff;
+      font-family: Arial, sans-serif;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 650px;
+      margin: 30px auto;
+    }
+
+    .card {
+      background: #111827;
+      border: 1px solid #273449;
+      border-radius: 18px;
+      padding: 30px;
+      box-shadow: 0 15px 50px #0006;
+    }
+
+    .brand {
+      text-align: center;
+      color: #f5b942;
+      font-size: 13px;
+      font-weight: bold;
+      letter-spacing: 4px;
+      margin-bottom: 25px;
+    }
+
+    .success-icon {
+      width: 65px;
+      height: 65px;
+      margin: auto;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: #123c2a;
+      color: #45e394;
+      font-size: 34px;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 27px;
+      margin: 18px 0 8px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #aab5c5;
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 28px;
+    }
+
+    .section {
+      margin-top: 22px;
+      padding: 19px;
+      background: #0b1220;
+      border: 1px solid #26354b;
+      border-radius: 12px;
+    }
+
+    .section h2 {
+      font-size: 15px;
+      color: #f5b942;
+      margin-bottom: 15px;
+    }
+
+    .detail {
+      display: flex;
+      justify-content: space-between;
+      gap: 15px;
+      padding: 10px 0;
+      border-bottom: 1px solid #26354b;
+      font-size: 14px;
+    }
+
+    .detail:last-child {
+      border-bottom: 0;
+    }
+
+    .detail span:first-child {
+      color: #9ca9bb;
+    }
+
+    .detail span:last-child {
+      text-align: right;
+      overflow-wrap: anywhere;
+      font-weight: 600;
+    }
+
+    .status {
+      color: #45e394;
+      text-transform: capitalize;
+    }
+
+    .pending {
+      color: #f5b942;
+      line-height: 1.7;
+      font-size: 14px;
+    }
+
+    .join-btn {
+      display: none;
+      width: 100%;
+      margin-top: 17px;
+      padding: 15px;
+      background: #16a34a;
+      color: white;
+      text-align: center;
+      text-decoration: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: bold;
+    }
+
+    .join-btn:hover {
+      background: #15803d;
+    }
+
+    .message {
+      text-align: center;
+      color: #9ca9bb;
+      font-size: 13px;
+      line-height: 1.7;
+      margin-top: 22px;
+    }
+
+    .error {
+      color: #ff8585;
+      text-align: center;
+      line-height: 1.7;
+      font-size: 14px;
+    }
+
+    @media(max-width: 480px) {
+      .card {
+        padding: 21px;
+      }
+
+      h1 {
+        font-size: 23px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="container">
+    <div class="card">
+
+      <div class="brand">HAWKS VERSE</div>
+
+      <div class="success-icon">✓</div>
+
+      <h1>Registration Successful!</h1>
+
+      <p class="subtitle">
+        Your squad registration has been received successfully.
+        Keep your confirmation details safe.
+      </p>
+
+      <div id="loading" class="message">
+        Verifying your registration details...
+      </div>
+
+      <div id="content" hidden>
+
+        <div class="section">
+          <h2>Registration Details</h2>
+
+          <div class="detail">
+            <span>Registration ID</span>
+            <span id="registrationId">—</span>
+          </div>
+
+          <div class="detail">
+            <span>Tournament</span>
+            <span id="tournament">—</span>
+          </div>
+
+          <div class="detail">
+            <span>Team Name</span>
+            <span id="team">—</span>
+          </div>
+
+          <div class="detail">
+            <span>Registration Status</span>
+            <span id="status" class="status">—</span>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2>IGL Details</h2>
+
+          <div class="detail">
+            <span>IGL Name</span>
+            <span id="igl">—</span>
+          </div>
+
+          <div class="detail">
+            <span>In-Game UID</span>
+            <span id="iglUid">—</span>
+          </div>
+
+          <div class="detail">
+            <span>Email</span>
+            <span id="email">—</span>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2>Squad Members</h2>
+          <div id="players"></div>
+        </div>
+
+        <div class="section">
+          <h2>Group Information</h2>
+
+          <div id="groupInfo" class="pending">
+            Checking group assignment...
+          </div>
+
+          <a
+            id="joinButton"
+            class="join-btn"
+            href="#"
+            target="_blank"
+            rel="noopener noreferrer">
+            JOIN WHATSAPP GROUP
+          </a>
+        </div>
+
+      </div>
+
+      <div id="error" class="message"></div>
+
+      <p class="message">
+        Thank you for registering with HAWKS VERSE.
+        Please keep this page for your records.
+      </p>
+
+    </div>
+  </main>
+
+  <script>
+    const $ = id => document.getElementById(id);
+
+    let registrationData = null;
+    let db = null;
+
+    function setText(id, value) {
+      $(id).textContent = value || "—";
+    }
+
+    function addPlayer(name, uid) {
+      const row = document.createElement("div");
+      row.className = "detail";
+
+      const left = document.createElement("span");
+      left.textContent = name || "Player";
+
+      const right = document.createElement("span");
+      right.textContent = uid || "—";
+
+      row.append(left, right);
+      $("players").appendChild(row);
+    }
+
+    function getValue(obj, ...keys) {
+      for (const key of keys) {
+        if (obj && obj[key] != null && obj[key] !== "") {
+          return obj[key];
+        }
+      }
+      return "";
+    }
+
+    async function verifyRegistration() {
+      if (!registrationData || !db) return;
+
+      const id = getValue(
+        registrationData,
+        "registrationId",
+        "registration_id",
+        "id"
+      );
+
+      const mobile = getValue(
+        registrationData,
+        "iglMobile",
+        "igl_mobile",
+        "mobile"
+      );
+
+      if (!id || !mobile) {
+        $("loading").hidden = true;
+        $("error").textContent =
+          "Registration details are incomplete. Please contact HAWKS VERSE support.";
+        return;
+      }
+
+      const result = await db.rpc(
+        "check_registration_secure",
+        {
+          p_registration_id: id,
+          p_igl_mobile: mobile
+        }
+      );
+
+      if (result.error) {
+        $("loading").hidden = true;
+        $("error").textContent =
+          "Unable to verify registration. Please contact HAWKS VERSE support.";
+        return;
+      }
+
+      const record = Array.isArray(result.data)
+        ? result.data[0]
+        : result.data;
+
+      if (!record) {
+        $("loading").hidden = true;
+        $("error").textContent =
+          "Registration could not be verified.";
+        return;
+      }
+
+      renderConfirmation(record);
+    }
+
+    function renderConfirmation(record) {
+      $("loading").hidden = true;
+      $("error").textContent = "";
+      $("content").hidden = false;
+
+      const p = registrationData;
+
+      setText(
+        "registrationId",
+        getValue(record, "registration_id") ||
+        getValue(p, "registrationId", "registration_id", "id")
+      );
+
+      setText(
+        "tournament",
+        getValue(p, "tournamentName", "tournament_name") ||
+        "Tournament"
+      );
+
+      setText(
+        "team",
+        getValue(p, "teamName", "team_name") ||
+        getValue(record, "team_name")
+      );
+
+      setText(
+        "igl",
+        getValue(p, "iglName", "igl_name")
+      );
+
+      setText(
+        "iglUid",
+        getValue(p, "iglUid", "igl_uid")
+      );
+
+      setText(
+        "email",
+        getValue(p, "iglEmail", "igl_email")
+      );
+
+      const status = getValue(record, "status") || "Pending";
+
+      $("status").textContent =
+        String(status).replaceAll("_", " ");
+
+      $("players").replaceChildren();
+
+      const players = Array.isArray(p.players)
+        ? p.players
+        : [];
+
+      if (players.length) {
+        players.forEach((player, index) => {
+          addPlayer(
+            player.name || "Player " + (index + 1),
+            player.uid || ""
+          );
+        });
+      } else {
+        addPlayer(
+          getValue(p, "iglName", "igl_name"),
+          getValue(p, "iglUid", "igl_uid")
+        );
+      }
+
+      updateGroup(record);
+    }
+
+    function updateGroup(record) {
+      const groupName = getValue(record, "group_name");
+      const groupNumber = getValue(record, "group_number");
+      const instructions = getValue(
+        record,
+        "group_instructions"
+      );
+
+      const whatsapp = getValue(
+        record,
+        "whatsapp_link"
+      );
+
+      const groupAssigned = Boolean(groupName || groupNumber);
+
+      if (!groupAssigned || !whatsapp) {
+        $("groupInfo").textContent =
+          "Your squad has been registered successfully. " +
+          "Group assignment is pending. Please check again later. " +
+          (instructions || "");
+
+        $("joinButton").style.display = "none";
+        return;
+      }
+
+      $("groupInfo").textContent =
+        "Group: " + groupName +
+        (groupNumber ? " (Group " + groupNumber + ")" : "") +
+        (instructions ? "\n" + instructions : "");
+
+      if (/^https:\/\/(chat\.whatsapp\.com|wa\.me)\//i.test(whatsapp)) {
+        $("joinButton").href = whatsapp;
+        $("joinButton").style.display = "block";
+      } else {
+        $("joinButton").style.display = "none";
+      }
+    }
+
+    window.addEventListener("message", async event => {
+      if (
+        event.origin !== window.location.origin ||
+        event.source !== window.opener ||
+        event.data?.type !== "HAWKS_CONFIRMATION_DATA"
+      ) {
+        return;
+      }
+
+      registrationData = event.data.payload;
+
+      if (!registrationData) return;
+
+      try {
+        await verifyRegistration();
+      } catch (error) {
+        $("loading").hidden = true;
+        $("error").textContent =
+          "Something went wrong while verifying your registration.";
+        console.error(error);
+      }
+    });
+
+    async function initialize() {
+      const C = window.HAWKS_CONFIG || {};
+
+      if (
+        !C.supabaseUrl ||
+        !C.supabasePublishableKey ||
+        !window.supabase
+      ) {
+        $("loading").hidden = true;
+        $("error").textContent =
+          "Database configuration is missing.";
+        return;
+      }
+
+      db = window.supabase.createClient(
+        C.supabaseUrl,
+        C.supabasePublishableKey
+      );
+
+      // Keep announcing readiness until the registration data arrives.
+      const readyTimer = setInterval(() => {
+        if (!registrationData && window.opener) {
+          window.opener.postMessage(
+            { type: "HAWKS_CONFIRMATION_READY" },
+            window.location.origin
+          );
+        } else {
+          clearInterval(readyTimer);
+        }
+      }, 500);
+
+      if (!window.opener) {
+        $("loading").hidden = true;
+        $("error").textContent =
+          "Please open this page through a successful squad registration.";
+      }
+    }
+
+    initialize();
+  </script>
+</body>
+</html>
